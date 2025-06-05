@@ -1,3 +1,5 @@
+// static/stock/producto_list.js
+
 document.addEventListener("DOMContentLoaded", function () {
   // -------- Variables --------
   const selectAllCheckbox = document.getElementById("selectAll");
@@ -6,15 +8,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const bulkDeleteForm    = document.getElementById("bulkDeleteForm");
   const selectedProductsContainer = document.getElementById("selectedProducts");
 
-  // Habilita o deshabilita el botón de eliminar según haya alguna fila seleccionada
+  // 1) Habilita o deshabilita el botón de eliminar según haya alguna fila seleccionada
   function toggleDeleteBtn() {
     const anySelected = Array.from(rowCheckboxes).some(cb => cb.checked);
-    if (bulkDeleteBtn) bulkDeleteBtn.disabled = !anySelected;
+    if (bulkDeleteBtn) {
+      bulkDeleteBtn.disabled = !anySelected;
+    }
   }
 
-  // Rellena inputs hidden con “selected_products” antes del submit
+  // 2) Rellena inputs hidden con “selected_products” antes del submit
   function updateSelectedProducts() {
+    // Limpiamos contenedor
     selectedProductsContainer.innerHTML = "";
+
+    // Por cada checkbox marcado, creamos un <input type="hidden" name="selected_products" value="ID" />
     rowCheckboxes.forEach(cb => {
       if (cb.checked) {
         const input = document.createElement("input");
@@ -26,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // “Select All” global
+  // 3) “Select All” global
   if (selectAllCheckbox) {
     selectAllCheckbox.addEventListener("change", function () {
       rowCheckboxes.forEach(cb => cb.checked = this.checked);
@@ -35,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Chequeo individual por fila
+  // 4) Chequeo individual por fila
   rowCheckboxes.forEach(cb => {
     cb.addEventListener("change", function () {
       // Si desmarcamos una fila, desmarcar “selectAll”
@@ -47,21 +54,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Confirmación al hacer “submit” para borrar
+  // 5) Confirmación al hacer “submit” para borrar
   if (bulkDeleteForm) {
     bulkDeleteForm.addEventListener("submit", function (e) {
+      // Inyectamos los inputs ocultos justo antes de enviar
+      updateSelectedProducts();
+
+      // Comprobamos cuántos han sido seleccionados
       const seleccionados = Array.from(rowCheckboxes).filter(cb => cb.checked);
-      if (seleccionados.length === 0 || !confirm(`¿Eliminar ${seleccionados.length} productos seleccionados?`)) {
+
+      // Si no hay ninguno, o si el usuario cancela el confirm, prevenimos el envío
+      if (seleccionados.length === 0 || !confirm(`¿Eliminar ${seleccionados.length} producto(s) seleccionado(s)?`)) {
         e.preventDefault();
       }
     });
   }
 
-  // Cerrar el sidebar con la tecla ESC (opcional)
+  // 6) (Opcional) cerrar el sidebar con la tecla ESC
   document.addEventListener("keydown", function(e) {
     if (e.key === "Escape") {
       const filterSidebar = document.getElementById("filterSidebar");
-      if (filterSidebar.classList.contains("show")) {
+      if (filterSidebar && filterSidebar.classList.contains("show")) {
         new bootstrap.Collapse(filterSidebar).hide();
       }
     }

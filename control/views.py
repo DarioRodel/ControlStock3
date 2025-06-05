@@ -125,37 +125,44 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             return self.form_invalid(form)
 
 
-# Vistas para Productos
+
 class ProductoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    """
+    Muestra la lista de productos con filtros, paginación y permite borrado masivo.
+    """
     permission_required = 'control.view_producto'
     model = Producto
     template_name = 'stock/producto_list.html'
     context_object_name = 'productos'
     paginate_by = 20
 
-    def post(self, request, *args, **kwargs):
-        # Recogemos los IDs de los checkboxes
-        ids = request.POST.getlist('selected_products')
-        if ids:
-            # Borrado masivo
-            Producto.objects.filter(pk__in=ids).delete()
-        # Volver a GET para renderizar la lista actualizada
-        return self.get(request, *args, **kwargs)
     def dispatch(self, request, *args, **kwargs):
+        """
+        Solo superuser, usuarios con rol 'admin' o 'ventas' pueden acceder.
+        """
         if not request.user.is_superuser and request.user.rol not in ['admin', 'ventas']:
-
-            return render(request, 'stock/403.html',
-                          {'message': "No tienes permisos para acceder a esta página."},
-                          status=403)
+            return render(
+                request,
+                'stock/403.html',
+                {'message': "No tienes permisos para acceder a esta página."},
+                status=403
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        """
+        Aplica filtros de búsqueda, categoría, estado y atributos.
+        """
+        queryset = super().get_queryset().select_related('categoria', 'ubicacion').prefetch_related(
+            'productoatributo_set__atributo',
+            'productoatributo_set__opcion'
+        ).distinct()
+
         search = self.request.GET.get('search')
         categoria = self.request.GET.get('categoria')
         estado = self.request.GET.get('estado')
         atributo_id = self.request.GET.get('atributo')
-        opciones_ids = self.request.GET.getlist('opcion')  # <-- Aquí
+        opciones_ids = self.request.GET.getlist('opcion')
 
         if search:
             queryset = queryset.filter(
@@ -163,26 +170,42 @@ class ProductoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                 Q(nombre__icontains=search) |
                 Q(descripcion__icontains=search)
             )
+
         if categoria:
             queryset = queryset.filter(categoria__id=categoria)
+
         if estado:
             queryset = queryset.filter(estado=estado)
+
         if atributo_id:
             queryset = queryset.filter(productoatributo__atributo_id=atributo_id)
+
         if opciones_ids:
             queryset = queryset.filter(productoatributo__opcion_id__in=opciones_ids)
 
-        return queryset.select_related('categoria', 'ubicacion').prefetch_related(
-            'productoatributo_set__atributo',
-            'productoatributo_set__opcion'
-        ).distinct()
+        return queryset
+
+    def post(self, request, *args, **kwargs):
+        """
+        Procesa el formulario de borrado masivo.
+        Recoge 'selected_products' y elimina esos productos.
+        Luego retorna un GET para volver a renderizar la lista.
+        """
+        ids = request.POST.getlist('selected_products')
+        if ids:
+            Producto.objects.filter(pk__in=ids).delete()
+        # Después de borrar, volvemos a renderizar la lista (GET)
+        return self.get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Listado de categorías y estados para el sidebar de filtros
         context['categorias'] = Categoria.objects.all()
         context['estados'] = Producto.ESTADO_STOCK
         context['atributos'] = Atributo.objects.all()
 
+        # Columnas disponibles (por si quieres mostrarlas dinámicamente)
         context['available_columns'] = [
             {'key': 'imagen', 'label': 'Imagen'},
             {'key': 'codigo', 'label': 'Código'},
@@ -194,17 +217,18 @@ class ProductoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             {'key': 'acciones', 'label': 'Acciones'},
         ]
 
+        # Si hay un atributo seleccionado, traer sus opciones para mostrarlas
         atributo_id = self.request.GET.get('atributo')
         if atributo_id:
             context['opciones'] = OpcionAtributo.objects.filter(atributo_id=atributo_id)
         else:
             context['opciones'] = None
 
-        # Aquí obtenemos opciones_ids de nuevo
-        opciones_ids = self.request.GET.getlist('opcion')
-        context['opciones_seleccionadas'] = opciones_ids
+        # Mantener en el contexto qué opciones de atributo están seleccionadas
+        context['opciones_seleccionadas'] = self.request.GET.getlist('opcion')
 
         return context
+
 
 
 class ProductoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

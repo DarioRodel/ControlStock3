@@ -1,339 +1,261 @@
-/* ======================
-   VARIABLES DE COLOR
-   ====================== */
+/* Archivo: static/css/nav.css */
+
+/* ------------------------------------------
+   VARIABLES Y AJUSTES GENERALES
+------------------------------------------- */
 :root {
-  --primary-color: #4361ee;
-  --primary-hover: #3a56d4;
-  --secondary-color: #3f37c9;
-  --dark-color: #1a1a2e;
-  --light-color: #f8f9fa;
-  --sidebar-bg: #ffffff;
-  --sidebar-text: #333333;
-  --sidebar-hover: #f0f2f5;
-  --topbar-bg: #ffffff;
-  --topbar-text: #333333;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --topbar-height: 60px;                 /* Altura reducida de la topbar */
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 70px;
   --transition-speed: 0.3s;
+  --topbar-bg-color: #ffffff;
+  --sidebar-bg-color: #f8f9fa;
+  --sidebar-hover-bg: rgba(0, 0, 0, 0.05);
+  --sidebar-text-color: #333333;
+  --topbar-text-color: #333333;
+  --sidebar-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  --topbar-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Modo oscuro */
-[data-theme="dark"] {
-  --primary-color: #4895ef;
-  --primary-hover: #3a7bc8;
-  --secondary-color: #560bad;
-  --dark-color: #0f0f1a;
-  --light-color: #1e1e2e;
-  --sidebar-bg: #1a1a2e;
-  --sidebar-text: #e6e6e6;
-  --sidebar-hover: #16213e;
-  --topbar-bg: #1a1a2e;
-  --topbar-text: #e6e6e6;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-}
-
-/* ======================
-   TOPBAR (NAV SUPERIOR)
-   ====================== */
+/* ------------------------------------------
+   1) TOPBAR FIJA (ARRIBA)
+------------------------------------------- */
 .topbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background-color: var(--topbar-bg);
-  color: var(--topbar-text);
+  height: var(--topbar-height);   /* 48px */
+  background-color: var(--topbar-bg-color);
+  box-shadow: var(--topbar-shadow);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 10px var(--shadow-color);
+  padding: 0 20px;                /* Antes 0 25px */
   z-index: 1000;
-  transition: background-color var(--transition-speed), color var(--transition-speed);
+  transition: background-color var(--transition-speed);
 }
 
 .topbar-logo {
   display: flex;
   align-items: center;
-  font-size: 1.5rem;
+  gap: 10px;
+}
+
+.topbar .logo-icon {
+  font-size: 26px;                /* Antes 28px */
+  color: var(--sidebar-text-color);
+}
+
+.topbar .logo-text {
+  font-size: 20px;                /* Antes 22px */
   font-weight: 700;
-  color: var(--primary-color);
-}
-
-.logo-icon {
-  margin-right: 10px;
-  font-size: 1.8rem;
-}
-
-.logo-text {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  letter-spacing: 1px;
+  color: var(--topbar-text-color);
 }
 
 .topbar-actions {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 14px;                      /* Antes 18px */
 }
 
-.topbar-icon {
-  font-size: 1.2rem;
-  color: var(--topbar-text);
-  cursor: pointer;
-  transition: color var(--transition-speed), transform 0.2s;
-  width: 36px;
-  height: 36px;
+.topbar .topbar-icon {
+  width: 38px;                    /* Antes 42px */
+  height: 38px;                   /* Antes 42px */
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  background-color: var(--topbar-bg-color);
+  color: var(--topbar-text-color);
+  cursor: pointer;
+  transition: background-color var(--transition-speed),
+              transform var(--transition-speed);
+  position: relative;
 }
 
-.topbar-icon:hover {
-  color: var(--primary-color);
-  transform: scale(1.1);
-  background-color: rgba(67, 97, 238, 0.1);
+.topbar .topbar-icon:hover {
+  background-color: var(--sidebar-text-color);
+  color: #ffffff;
+  transform: translateY(-2px);
 }
 
-/* ======================
-   SIDEBAR (MENÚ LATERAL)
-   ====================== */
+.topbar .tooltip-text {
+  position: absolute;
+  bottom: -1.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333333;
+  color: #ffffff;
+  font-size: 11px;                /* Antes 12px */
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-speed);
+}
+
+.topbar .topbar-icon:hover .tooltip-text {
+  opacity: 1;
+}
+
+/* ------------------------------------------
+   2) SIDEBAR ABIERTA POR DEFECTO
+------------------------------------------- */
 .sidebar {
   position: fixed;
-  top: 60px;
+  top: var(--topbar-height);      /* Ahora 48px */
   left: 0;
-  bottom: 0;
-  width: 250px;
-  background-color: var(--sidebar-bg);
-  color: var(--sidebar-text);
+  width: var(--sidebar-width);
+  height: calc(100% - var(--topbar-height));
+  background-color: var(--sidebar-bg-color);
+  padding-top: 0.5rem;            /* Antes 1rem; lo bajamos a 0.5rem para menos espacio arriba */
+  overflow-y: auto;
+  box-shadow: var(--sidebar-shadow);
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
-  box-shadow: 2px 0 10px var(--shadow-color);
+  transition: width var(--transition-speed);
   z-index: 999;
-  transition: all var(--transition-speed);
-  overflow-y: auto;
 }
 
 .sidebar.collapsed {
-  width: 60px;
+  width: var(--sidebar-collapsed-width);
 }
 
-.sidebar.collapsed .link-text,
-.sidebar.collapsed .fa-chevron-down {
-  display: none;
-}
-
-.sidebar-toggle {
-  position: absolute;
-  right: -15px;
-  top: 20px;
-  width: 30px;
-  height: 30px;
-  background-color: var(--sidebar-bg);
-  border: 1px solid var(--shadow-color);
-  border-radius: 50%;
+/* ------------------------------------------
+   2.1) BOTÓN/FLECHA PARA COLAPSAR / EXPANDIR
+------------------------------------------- */
+.sidebar .sidebar-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0.5rem 1rem;           /* Antes 0.75rem 1rem; bajamos el vertical para que no genere tanto espacio */
   cursor: pointer;
-  box-shadow: 0 0 5px var(--shadow-color);
-  transition: all var(--transition-speed);
-  z-index: 1001;
+  transition: background-color var(--transition-speed);
 }
 
-.sidebar-toggle:hover {
-  background-color: var(--primary-color);
-  color: white;
+.sidebar .sidebar-toggle:hover {
+  background-color: var(--sidebar-hover-bg);
+}
+
+.sidebar .sidebar-toggle i {
+  font-size: 18px;
+  transition: transform var(--transition-speed);
+  transform: rotate(0deg);
+  color: var(--sidebar-text-color);
 }
 
 .sidebar.collapsed .sidebar-toggle i {
   transform: rotate(180deg);
 }
 
+/* ------------------------------------------
+   2.2) ENLACES Y SUBMENÚS DE LA SIDEBAR
+------------------------------------------- */
 .sidebar a {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
-  color: var(--sidebar-text);
+  padding: 0.5rem 1rem;           /* Antes 0.75rem 1rem; bajamos algo para menos espacio vertical */
+  color: var(--sidebar-text-color);
   text-decoration: none;
-  transition: all var(--transition-speed);
-  position: relative;
-  white-space: nowrap;
+  transition: background-color var(--transition-speed),
+              color var(--transition-speed);
 }
 
-.sidebar a i {
-  font-size: 1.1rem;
-  margin-right: 15px;
-  width: 20px;
+/* Ocultamos los textos de los enlaces si la sidebar está colapsada */
+.sidebar.collapsed a .link-text {
+  display: none;
+}
+
+/* Centramos solamente el ícono cuando está colapsada */
+.sidebar.collapsed a i {
+  margin-right: 0;
   text-align: center;
+  width: 100%;
 }
 
-.sidebar a:hover {
-  background-color: var(--sidebar-hover);
-  color: var(--primary-color);
+/* Para los elementos que colapsan (collapse de Bootstrap) */
+.sidebar a[data-bs-toggle="collapse"] {
+  justify-content: space-between;
 }
 
-.sidebar a.active {
-  background-color: rgba(67, 97, 238, 0.1);
-  color: var(--primary-color);
-  border-left: 3px solid var(--primary-color);
-}
-
-.sidebar a.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background-color: var(--primary-color);
-}
-
-.submenu {
-  padding-left: 20px;
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.submenu a {
-  padding: 10px 20px 10px 40px;
-  font-size: 0.9rem;
-}
-
-.submenu a:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.sidebar .fa-chevron-down {
-  transition: transform var(--transition-speed);
-  font-size: 0.8rem;
-}
-
-.sidebar a[aria-expanded="true"] .fa-chevron-down {
-  transform: rotate(180deg);
-}
-
-.reportes {
-  margin-top: auto;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  padding-top: 10px;
-}
-
-/* ======================
-   CONTENIDO PRINCIPAL
-   ====================== */
-.main-content {
-  margin-left: 250px;
-  margin-top: 60px;
-  padding: 20px;
-  transition: margin-left var(--transition-speed);
-}
-
-.sidebar.collapsed ~ .main-content {
-  margin-left: 60px;
-}
-
-/* ======================
-   MODAL DE INFORMACIÓN
-   ====================== */
-.modal-content {
-  border: none;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+.sidebar .submenu {
+  background-color: transparent;
+  transition: max-height var(--transition-speed);
   overflow: hidden;
 }
 
-.modal-header {
-  border-bottom: none;
-  padding: 20px;
+/* Si la sidebar está colapsada, escondemos todo el submenu */
+.sidebar.collapsed .submenu {
+  display: none;
 }
 
-.modal-title i {
-  font-size: 1.5rem;
+.sidebar a:hover {
+  background-color: var(--sidebar-hover-bg);
 }
 
-.modal-body {
-  padding: 25px;
+.sidebar .fas {
+  width: 20px;
+  text-align: center;
+  margin-right: 0.5rem;           /* Antes 0.75rem; bajamos a 0.5rem */
+  transition: color var(--transition-speed);
 }
 
-.modal-body h6 {
-  color: var(--primary-color);
+.sidebar.collapsed .fas {
+  margin-right: 0;
 }
 
-.modal-footer {
-  border-top: none;
-  padding: 15px 20px;
-  background-color: #f8f9fa;
+.sidebar .reportes {
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* ======================
-   EFECTOS Y ANIMACIONES
-   ====================== */
-.collapsing {
-  transition: height var(--transition-speed) ease;
+.sidebar .reportes a {
+  color: #dc3545 !important;
+  font-weight: 600;
 }
 
-/* ======================
-   RESPONSIVE DESIGN
-   ====================== */
-@media (max-width: 992px) {
+/* ------------------------------------------
+   3) ÁREA DE CONTENIDO
+      (SE AJUSTA SEGÚN EL ESTADO DE LA SIDEBAR)
+------------------------------------------- */
+.content {
+  margin-top: calc(var(--topbar-height) - 8px);  /* 48px - 8px = 40px */
+  margin-left: var(--sidebar-width);
+  padding: 0.75rem;       /* Antes era 1rem; bajamos a 0.75rem para menos “aire” interno */
+  transition: margin-left var(--transition-speed);
+}
+
+.sidebar.collapsed ~ .content {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* ------------------------------------------
+   4) ADAPTACIÓN PARA MÓVIL
+------------------------------------------- */
+@media (max-width: 767.98px) {
   .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.show {
-    transform: translateX(0);
-  }
-
-  .main-content {
-    margin-left: 0;
-  }
-
-  .sidebar-toggle {
     display: none;
   }
-
-  .mobile-menu-toggle {
-    display: block;
+  .content {
+    margin-left: 0;
   }
 }
 
-/* ======================
-   ESTILOS PARA EL TOGGLER
-   ====================== */
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--topbar-text);
-  cursor: pointer;
+/* ------------------------------------------
+   5) EVITAR SOLAPAMIENTOS INDESEADOS
+------------------------------------------- */
+body {
+  padding-top: var(--topbar-height);  /* 48px en lugar de 60px */
+  overflow-x: hidden;
 }
 
-/* ======================
-   ESTILOS PARA EL DARK MODE
-   ====================== */
-#darkModeToggleTopbar {
-  position: relative;
-}
-
-#darkModeToggleTopbar .tooltip-text {
-  visibility: hidden;
-  width: 120px;
-  background-color: var(--dark-color);
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-#darkModeToggleTopbar:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
+/* ------------------------------------------
+   6) SOBREESCRIBIR MARGEN DE “.card” SI TIENE mt-X MUY GRANDE
+------------------------------------------- */
+/* Si tus cards vienen con class="card mt-4", baja ese mt-4 a mt-2 o bien:
+   .card { margin-top: 0.5rem !important; }  para que no deje 1.5rem (24px). */
+.card {
+  margin-top: 0.5rem;  /* 0.5rem = 8px, en lugar de 24px */
 }
