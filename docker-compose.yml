@@ -13,7 +13,7 @@ services:
       DJANGO_DB_NAME: os.getenv("DJANGO_DB_NAME")
       DJANGO_DB_USER: os.getenv("DJANGO_DB_USER")
       DJANGO_DB_PASSWORD: os.getenv("DJANGO_DB_PASSWORD")
-      IS_DOCKER: True
+      IS_DOCKER: 1
   db:
     image: mysql:8.0
     container_name: controlstock_db
