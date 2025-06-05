@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportar error{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/reportar_error.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- CONTENIDO PRINCIPAL -->
+<div class="content">
+    <div class="container px-2 py-2">  <!-- Menos padding horizontal y vertical -->
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0"><i class="fas fa-bug me-2"></i>Reportar un Error</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="dark-theme-text mb-4">
+                            Si has encontrado un problema, por favor descríbelo aquí abajo. Lo revisaremos lo antes posible.
+                        </p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_asunto" class="form-label">Asunto</label>
+                                {{ form.asunto }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_descripcion" class="form-label">Descripción</label>
+                                {{ form.descripcion }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">Tu correo electrónico (opcional)</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'stock:dashboard' %}" class="btn btn-secondary">Volver</a>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-paper-plane me-2"></i>Enviar Reporte
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const darkModeToggleTopbar = document.getElementById('darkModeToggleTopbar');
+darkModeToggleTopbar.addEventListener('click', function () {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+        document.body.removeAttribute('data-theme');
+        darkModeToggleTopbar.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.setAttribute('data-theme', 'dark');
+        darkModeToggleTopbar.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('theme', 'dark');
+    }
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const isDark = localStorage.getItem('theme') === 'dark';
+    if (isDark) {
+        document.body.setAttribute('data-theme', 'dark');
+        darkModeToggleTopbar.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.body.removeAttribute('data-theme');
+        darkModeToggleTopbar.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+});
+</script>
+{% endblock %}

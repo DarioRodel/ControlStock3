@@ -1,0 +1,339 @@
+/* ======================
+   VARIABLES DE COLOR
+   ====================== */
+:root {
+  --primary-color: #4361ee;
+  --primary-hover: #3a56d4;
+  --secondary-color: #3f37c9;
+  --dark-color: #1a1a2e;
+  --light-color: #f8f9fa;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #333333;
+  --sidebar-hover: #f0f2f5;
+  --topbar-bg: #ffffff;
+  --topbar-text: #333333;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+}
+
+/* Modo oscuro */
+[data-theme="dark"] {
+  --primary-color: #4895ef;
+  --primary-hover: #3a7bc8;
+  --secondary-color: #560bad;
+  --dark-color: #0f0f1a;
+  --light-color: #1e1e2e;
+  --sidebar-bg: #1a1a2e;
+  --sidebar-text: #e6e6e6;
+  --sidebar-hover: #16213e;
+  --topbar-bg: #1a1a2e;
+  --topbar-text: #e6e6e6;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* ======================
+   TOPBAR (NAV SUPERIOR)
+   ====================== */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: var(--topbar-bg);
+  color: var(--topbar-text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  z-index: 1000;
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.logo-icon {
+  margin-right: 10px;
+  font-size: 1.8rem;
+}
+
+.logo-text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 1px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.topbar-icon {
+  font-size: 1.2rem;
+  color: var(--topbar-text);
+  cursor: pointer;
+  transition: color var(--transition-speed), transform 0.2s;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.topbar-icon:hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
+  background-color: rgba(67, 97, 238, 0.1);
+}
+
+/* ======================
+   SIDEBAR (MENÚ LATERAL)
+   ====================== */
+.sidebar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  box-shadow: 2px 0 10px var(--shadow-color);
+  z-index: 999;
+  transition: all var(--transition-speed);
+  overflow-y: auto;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed .link-text,
+.sidebar.collapsed .fa-chevron-down {
+  display: none;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  right: -15px;
+  top: 20px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--sidebar-bg);
+  border: 1px solid var(--shadow-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 5px var(--shadow-color);
+  transition: all var(--transition-speed);
+  z-index: 1001;
+}
+
+.sidebar-toggle:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.sidebar.collapsed .sidebar-toggle i {
+  transform: rotate(180deg);
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  transition: all var(--transition-speed);
+  position: relative;
+  white-space: nowrap;
+}
+
+.sidebar a i {
+  font-size: 1.1rem;
+  margin-right: 15px;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar a:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--primary-color);
+}
+
+.sidebar a.active {
+  background-color: rgba(67, 97, 238, 0.1);
+  color: var(--primary-color);
+  border-left: 3px solid var(--primary-color);
+}
+
+.sidebar a.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--primary-color);
+}
+
+.submenu {
+  padding-left: 20px;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.submenu a {
+  padding: 10px 20px 10px 40px;
+  font-size: 0.9rem;
+}
+
+.submenu a:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar .fa-chevron-down {
+  transition: transform var(--transition-speed);
+  font-size: 0.8rem;
+}
+
+.sidebar a[aria-expanded="true"] .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+.reportes {
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 10px;
+}
+
+/* ======================
+   CONTENIDO PRINCIPAL
+   ====================== */
+.main-content {
+  margin-left: 250px;
+  margin-top: 60px;
+  padding: 20px;
+  transition: margin-left var(--transition-speed);
+}
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 60px;
+}
+
+/* ======================
+   MODAL DE INFORMACIÓN
+   ====================== */
+.modal-content {
+  border: none;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.modal-header {
+  border-bottom: none;
+  padding: 20px;
+}
+
+.modal-title i {
+  font-size: 1.5rem;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.modal-body h6 {
+  color: var(--primary-color);
+}
+
+.modal-footer {
+  border-top: none;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+}
+
+/* ======================
+   EFECTOS Y ANIMACIONES
+   ====================== */
+.collapsing {
+  transition: height var(--transition-speed) ease;
+}
+
+/* ======================
+   RESPONSIVE DESIGN
+   ====================== */
+@media (max-width: 992px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+}
+
+/* ======================
+   ESTILOS PARA EL TOGGLER
+   ====================== */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--topbar-text);
+  cursor: pointer;
+}
+
+/* ======================
+   ESTILOS PARA EL DARK MODE
+   ====================== */
+#darkModeToggleTopbar {
+  position: relative;
+}
+
+#darkModeToggleTopbar .tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  background-color: var(--dark-color);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#darkModeToggleTopbar:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}

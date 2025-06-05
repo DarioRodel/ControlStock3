@@ -1,0 +1,72 @@
+@import url("base.css");
+
+    /* Variables globales */
+:root {
+    --primary-color: #4CAF50;
+    --danger-color: #f44336;
+    --background-color: #f4f7fb;
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --card-hover: rgba(0, 0, 0, 0.03);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+/* Modo oscuro */
+body[data-theme="dark"] {
+    --background-color: #0d1117;
+    --card-bg: #161b22;
+    --text-color: #c9d1d9;
+    --shadow-color: rgba(255, 255, 255, 0.05);
+    --card-hover: rgba(255, 255, 255, 0.05);
+    --primary-color: #58a6ff;
+    --secondary-color: #6e7681;
+    --accent-color: #f78166;
+    --danger-color: #ff7b72;
+
+
+}
+body[data-theme="dark"] .sidebar .reportes {
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+body.page-error {
+    --topbar-height: 40px;
+}
+/* reportar_error.css */
+
+.container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+}
+
+.dark-theme-text {
+    color: var(--text-color);
+}
+
+body {
+    margin: 0;
+    padding-top: var(--topbar-height);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif;
+    transition: background-color .3s, color .3s;
+}
+/* Estilos generales */
+body {
+    background-color: var(--background-color);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    padding-top: var(--topbar-height);
+    margin: 0; /* para prevenir scroll horizontal */
+}

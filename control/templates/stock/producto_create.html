@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Producto{% else %}Nuevo Producto{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/producto_create.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/producto_create.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="d-flex justify-content-end mb-1">
+            <button
+                    id="btnSave"
+                    type="submit"
+                    form="productoForm"
+                    class="btn btn-success save-btn"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    title="Guardar producto"
+            >
+                <i class="fas fa-save"></i>
+            </button>
+        </div>
+
+        <div class="card " style="max-width: 1000px;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    {% if form.instance.pk %}
+                        <i class="fas fa-edit me-2"></i>Editar Producto
+                    {% else %}
+                        <i class="fas fa-plus-circle me-2"></i>Crear Nuevo Producto
+                    {% endif %}
+                </h3>
+            </div>
+
+            <div class="card-body">
+                <form id="productoForm" method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Código de Barras o Referencia<span
+                                    class="text-danger">*</span></label>
+                            {{ form.codigo_barras|attr:"placeholder:Ingresar código"|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre<span class="text-danger">*</span></label>
+                            {{ form.nombre|attr:"placeholder:Nombre del producto"|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Categoría<span class="text-danger">*</span></label>
+                            {{ form.categoria|add_class:"form-select" }}
+                            <div class="mt-3">
+                                <label class="form-label">Imagen del Producto</label>
+                                <label for="{{ form.imagen.id_for_label }}" class="btn btn-outline-primary w-100 mb-2">
+                                    <i class="fas fa-upload me-1"></i>Subir imagen
+                                </label>
+                                {{ form.imagen|add_class:"form-control-file d-none" }}
+                                <div class="mt-3 text-center">
+                                    <img id="preview-img"
+                                            {% if form.instance.imagen %}src="{{ form.instance.imagen.url }}"{% endif %}
+                                         class="img-thumbnail d-block mx-auto"
+                                         style="max-width:150px; {% if not form.instance.imagen %}display:none;{% endif %}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Descripción</label>
+                            {{ form.descripcion|attr:"placeholder:Descripción detallada"|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Precio compra</label>
+                            {{ form.precio_compra|attr:"placeholder:0.00"|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Precio venta</label>
+                            {{ form.precio_venta|attr:"placeholder:0.00"|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stock actual</label>
+                            {{ form.stock_actual|attr:"placeholder:0"|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stock mínimo</label>
+                            {{ form.stock_minimo|attr:"placeholder:0"|add_class:"form-control" }}
+                        </div>
+                    </div>
+
+                    <!-- Atributos -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <input type="checkbox" id="selectAllAttributes" class="form-check-input me-2 mt-0">
+                                <h5 class="mb-0">Atributos del Producto</h5>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="add-atributo" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Agregar atributo
+                                </button>
+                                <button type="button" id="delete-atributos" class="btn btn-sm btn-danger" disabled>
+                                    <i class="fas fa-trash-alt me-1"></i>Eliminar seleccionados
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            {{ atributo_formset.management_form }}
+                            <div id="atributos-container">
+                                {% for subform in atributo_formset.forms %}
+                                    <div class="atributo-form mb-3 border p-3 position-relative">
+                                        <div class="row g-3 align-items-center">
+                                            <div class="col-auto">
+                                                <input type="checkbox" class="attr-checkbox form-check-input">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <label class="form-label mb-1">Atributo</label>
+                                                {{ subform.atributo|add_class:"form-select atributo-select" }}
+                                            </div>
+                                            <div class="col-md-5">
+                                                <label class="form-label mb-1">Opción</label>
+                                                {{ subform.opcion|add_class:"form-select opcion-select" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        window.__atributoOpciones__ = {
+            {% for atributo in atributos %}
+                "{{ atributo.id }}": [
+                    {% for opt in atributo.opciones.all %}
+                        {
+                            id: "{{ opt.id }}",
+                            valor: "{{ opt.valor|escapejs }}",
+                            atributo_nombre: "{{ atributo.nombre|escapejs }}"
+                        },
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAllAttributes');
+    const deleteButton = document.getElementById('delete-atributos');
+    const atributosContainer = document.getElementById('atributos-container');
+
+    // 1) Actualiza el estado del botón “Eliminar seleccionados” según haya checkboxes marcados o no
+    function updateDeleteButton() {
+        const anyChecked = atributosContainer.querySelector('.attr-checkbox:checked') !== null;
+        deleteButton.disabled = !anyChecked;
+    }
+
+    // 2) Al cambiar “Seleccionar todos”, marcamos o desmarcamos todos los checkboxes de atributos
+    selectAllCheckbox.addEventListener('change', function() {
+        const allCheckboxes = atributosContainer.querySelectorAll('.attr-checkbox');
+        allCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        updateDeleteButton();
+    });
+
+    // 3) Si se marca o desmarca un checkbox individual, actualizamos el botón y el “Seleccionar todos”
+    atributosContainer.addEventListener('change', function(e) {
+        if (!e.target.classList.contains('attr-checkbox')) return;
+        updateDeleteButton();
+
+        // Si algún checkbox individual queda sin marcar, “Seleccionar todos” se desmarca
+        if (!e.target.checked && selectAllCheckbox.checked) {
+            selectAllCheckbox.checked = false;
+        }
+        // Si todos están marcados, marcamos “Seleccionar todos”
+        const allCheckboxes = atributosContainer.querySelectorAll('.attr-checkbox');
+        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+        if (allChecked) {
+            selectAllCheckbox.checked = true;
+        }
+    });
+
+    // 4) Al hacer clic en “Eliminar seleccionados”:
+    //    • Marcamos el campo hidden DELETE de cada subform (para que Django entienda que debe borrarlo)
+    //    • Ocultamos visualmente ese bloque de atributo
+    deleteButton.addEventListener('click', function() {
+        const checkedBoxes = atributosContainer.querySelectorAll('.attr-checkbox:checked');
+        checkedBoxes.forEach(function(checkbox) {
+            const atributoForm = checkbox.closest('.atributo-form');
+            // Buscamos el input DELETE (Django formset) dentro de este subform
+            const deleteInput = atributoForm.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;        // lo marcamos para que el formset borre ese registro
+            }
+            atributoForm.style.display = 'none';   // lo ocultamos en la UI
+            checkbox.checked = false;               // limpiamos el checkbox
+        });
+
+        // Después de borrar, desmarcamos “Seleccionar todos” y actualizamos el estado del botón
+        selectAllCheckbox.checked = false;
+        updateDeleteButton();
+    });
+
+    // 5) Al cargar la página, nos aseguramos de inicializar el estado correcto del botón
+    updateDeleteButton();
+});
+
+    </script>
+
+    <script src="{% static 'producto/js/producto_create.js' %}" defer></script>
+
+{% endblock %}

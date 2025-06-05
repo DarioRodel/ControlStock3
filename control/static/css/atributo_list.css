@@ -1,0 +1,87 @@
+@import url("base.css");
+
+/* === VARIABLES BASE === */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --danger-color: #f44336;
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --card-hover: rgba(0, 0, 0, 0.03);
+    --input-border: #e2e8f0;
+    --card-radius: 0.75rem;
+}
+
+/* === MODO OSCURO === */
+body[data-theme="dark"] {
+    --card-bg: #1e1e2f;
+    --text-color: #e0e0e0;
+    --card-hover: rgba(255, 255, 255, 0.08);
+    --input-border: #3d3d3d;
+}
+
+/* === BODY GENERAL === */
+body {
+    background-color: var(--background-color, #f4f7fb);
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* === CARDS DE ATRIBUTOS === */
+.card-custom {
+    background-color: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--card-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* === TITULOS === */
+.metric-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* === BOTONES === */
+.btn-outline-primary {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+/* === TEXTO VACÍO === */
+.text-danger {
+    font-weight: 600;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .metric-title {
+        font-size: 1rem;
+    }
+
+    .card-custom {
+        padding: 1rem;
+    }
+}

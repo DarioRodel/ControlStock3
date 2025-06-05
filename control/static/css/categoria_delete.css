@@ -1,0 +1,87 @@
+@import url("base.css");
+
+/* Evitar scroll horizontal */
+html, body {
+    overflow-x: hidden;
+}
+
+/* Variables globales (modo claro) */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --accent-color: #FF9800;
+    --danger-color: #f44336;
+    --background-color: #f4f7fb;
+    --card-radius: 8px;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --card-hover: rgba(0, 0, 0, 0.03);
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --placeholder-color: #94a3b8;
+    --table-header-bg: #f8f9fa;
+    --table-border: #e9ecef;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.25rem;
+}
+
+/* Variables modo oscuro */
+body[data-theme="dark"] {
+    --background-color: #121212;
+    --card-bg: #1e1e2f;
+    --text-color: #e0e0e0;
+    --shadow-color: rgba(255, 255, 255, 0.05);
+    --card-hover: rgba(255, 255, 255, 0.08);
+    --input-bg: #2d2d2d;
+    --input-border: #404040;
+    --placeholder-color: #a0aec0;
+    --table-header-bg: #2d2d2d;
+    --table-border: #404040;
+}
+
+/* Estilos generales */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: var(--font-size-base);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Contenido principal ajustado */
+.content {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    overflow-x: auto;
+}
+
+/* Tarjetas */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--input-border);
+    box-shadow: 0 4px 6px -1px var(--shadow-color);
+    border-radius: var(--card-radius);
+    transition: background-color 0.3s;
+}
+
+/* Textos grandes en pantallas mayores */
+.card-body h5,
+.fw-bold,
+h2 {
+    font-size: var(--font-size-lg);
+}
+
+/* Contenedor ancho */
+.container {
+    max-width: 1200px;
+    padding: 2rem 1.5rem;
+}
+
+/* Fuente más grande en tablets y desktops */
+@media (min-width: 768px) {
+    body { font-size: 1.25rem; }
+    .card-body h5, .fw-bold, h2 { font-size: 1.5rem; }
+}
+@media (min-width: 1200px) {
+    body { font-size: 1.5rem; }
+}

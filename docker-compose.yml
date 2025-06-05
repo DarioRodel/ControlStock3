@@ -1,0 +1,31 @@
+services:
+  web:
+    build: .
+    container_name: controlstock_web
+    volumes:
+      - .:/ControlStock
+    ports:
+      - "8005:8000"
+    depends_on:
+      - db
+    environment:
+      DJANGO_DB_HOST: os.getenv("DJANGO_DB_HOST")
+      DJANGO_DB_NAME: os.getenv("DJANGO_DB_NAME")
+      DJANGO_DB_USER: os.getenv("DJANGO_DB_USER")
+      DJANGO_DB_PASSWORD: os.getenv("DJANGO_DB_PASSWORD")
+      IS_DOCKER: True
+  db:
+    image: mysql:8.0
+    container_name: controlstock_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: os.getenv("MYSQL_ROOT_PASSWORD")
+      MYSQL_USER: os.getenv("MYSQL_USER")
+      MYSQL_PASSWORD: os.getenv("MYSQL_PASSWORD")
+      MYSQL_DATABASE: os.getenv("MYSQL_DATABASE")
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+volumes:
+  db_data:

@@ -1,0 +1,78 @@
+<!-- control/templates/accounts/login.html -->
+{% load widget_tweaks %}
+{% load socialaccount %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0">Iniciar Sesión</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
+                            {% render_field form.username class="form-control" placeholder="Ingresa tu usuario" %}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.username.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+                            {% render_field form.password class="form-control" placeholder="Ingresa tu contraseña" %}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Acceder</button>
+
+                        <div class="text-center mb-3">
+                            <a href="#" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-4">
+                            <hr class="flex-grow-1">
+                            <span class="mx-3 text-muted">o</span>
+                            <hr class="flex-grow-1">
+                        </div>
+
+                        <div class="social-login">
+                            <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-2">
+                                <i class="fab fa-google me-2"></i> Continuar con Google
+                            </a>
+                            <!-- Puedes añadir más proveedores aquí -->
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3 bg-light">
+                    <p class="mb-0">¿No tienes cuenta? <a href="{% url 'register' %}" class="text-primary fw-bold">Regístrate aquí</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
