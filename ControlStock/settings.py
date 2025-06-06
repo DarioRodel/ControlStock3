@@ -93,11 +93,14 @@ IS_DOCKER = os.environ.get('IS_DOCKER', False)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'control_stock',
-        'USER': 'admin',
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': 'localhost',
+        'NAME': os.environ.get('DJANGO_DB_NAME', 'controlstock'),
+        'USER': os.environ.get('DJANGO_DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
+        'HOST': os.environ.get('DJANGO_DB_HOST', 'db'),
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 WSGI_APPLICATION = 'ControlStock.wsgi.application'
