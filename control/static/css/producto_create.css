@@ -44,6 +44,7 @@ body[data-theme="dark"] {
 
 /* === BODY === */
 body {
+    padding: 20rem;
     background-color: var(--background-color);
     color: var(--text-color);
     font-family: 'Segoe UI', sans-serif;
