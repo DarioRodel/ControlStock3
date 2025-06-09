@@ -4,7 +4,8 @@ import openpyxl
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import redirect, render  # Importa la función redirect para redireccionar a otras URLs.
-from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, \
     DeleteView  # Importa vistas genéricas de Django.
@@ -966,7 +967,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import CustomUserCreationForm
 
-
+@method_decorator(csrf_protect, name='dispatch')
 class RegistroUsuarioView(CreateView):
     """
     Vista para registrar nuevos usuarios.

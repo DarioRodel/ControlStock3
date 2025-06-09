@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   // -------- Capturamos elementos del DOM una sola vez --------
   const selectAllCheckbox = document.getElementById("selectAll");
@@ -6,7 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const bulkDeleteForm = document.getElementById("bulkDeleteForm");
   const selectedProductsContainer = document.getElementById("selectedProducts");
   const filterSidebar = document.getElementById("filterSidebar");
-  const closeFilterBtn = document.querySelector("[data-bs-target='#filterSidebar']");
+  const toggleFilterBtn = document.getElementById("toggleFilterSidebarBtn");
+  const closeFilterBtn = document.getElementById("closeFilterSidebar");
   const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 
   // 1) Habilita o deshabilita el botón de eliminar
@@ -20,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateSelectedProducts() {
     if (!selectedProductsContainer) return;
     selectedProductsContainer.innerHTML = "";
-    
+
     rowCheckboxes.forEach(cb => {
       if (cb.checked) {
         const input = document.createElement("input");
@@ -57,56 +59,42 @@ document.addEventListener("DOMContentLoaded", function () {
     bulkDeleteForm.addEventListener("submit", function (e) {
       updateSelectedProducts();
       const seleccionados = Array.from(rowCheckboxes).filter(cb => cb.checked);
-      
+
       if (seleccionados.length === 0 || !confirm(`¿Eliminar ${seleccionados.length} producto(s) seleccionado(s)?`)) {
         e.preventDefault();
       }
     });
   }
 
-  // 6) Cerrar el sidebar de filtros con ESC
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") {
-    const filterSidebar = document.getElementById("filterSidebar");
-    if (filterSidebar && filterSidebar.classList.contains("show")) {
-      new bootstrap.Collapse(filterSidebar).hide();
-    }
+  // 6) Toggle del sidebar de filtros
+  if (toggleFilterBtn && filterSidebar) {
+    toggleFilterBtn.addEventListener("click", function() {
+      filterSidebar.classList.toggle("show");
+    });
   }
-});
 
-// 7) Botón para cerrar manualmente el sidebar
-const closeBtn = document.getElementById("closeFilterSidebar");
-if (closeBtn) {
-  closeBtn.addEventListener("click", function () {
-    const sidebar = document.getElementById("filterSidebar");
-    if (sidebar && sidebar.classList.contains("show")) {
-      new bootstrap.Collapse(sidebar).hide();
+  // 7) Cerrar el sidebar de filtros con el botón
+  if (closeFilterBtn) {
+    closeFilterBtn.addEventListener("click", function() {
+      filterSidebar.classList.remove("show");
+    });
+  }
+
+  // 8) Cerrar el sidebar de filtros con ESC
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && filterSidebar && filterSidebar.classList.contains("show")) {
+      filterSidebar.classList.remove("show");
     }
   });
-}
 
-// 8) Botón para limpiar filtros también colapsa el sidebar
-if (clearFiltersBtn) {
-  clearFiltersBtn.addEventListener("click", function (e) {
-    e.preventDefault(); // evita que el enlace navegue inmediatamente
-
-    const sidebar = document.getElementById("filterSidebar");
-    if (sidebar && sidebar.classList.contains("show")) {
-      const collapse = new bootstrap.Collapse(sidebar, {
-        toggle: false
-      });
-      collapse.hide();
-
-      // Esperamos un poco para que el colapso se vea, luego redirigimos
+  // 9) Botón para limpiar filtros
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      filterSidebar.classList.remove("show");
       setTimeout(() => {
         window.location.href = clearFiltersBtn.href;
-      }, 300); // 300ms = duración del colapso
-    } else {
-      // Si el sidebar ya está oculto, redirige de inmediato
-      window.location.href = clearFiltersBtn.href;
-    }
-  });
-}
-
-
+      }, 300);
+    });
+  }
 });

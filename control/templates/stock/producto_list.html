@@ -5,451 +5,289 @@
 {% block title %}Productos – InventarioPro{% endblock %}
 
 {% block content %}
-    <div class="container-fluid py-2">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h2 class="fw-bold text-primary fs-2">
-                <i class="fas fa-boxes me-2 fs-3"></i> Productos
-            </h2>
-            <div class="d-flex gap-2">
-                <!-- Botón para abrir/ocultar el sidebar de filtros -->
-                <button
-                        class="btn btn-outline-primary"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#filterSidebar"
-                        aria-expanded="{% if request.GET.search or request.GET.categoria or request.GET.estado or request.GET.atributo or opciones_seleccionadas %}true{% else %}false{% endif %}"
-                        aria-controls="filterSidebar"
-                >
-                    <i class="fas fa-filter me-1"></i> Filtros
-                </button>
+<div class="container-fluid py-2">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="fw-bold text-primary fs-2">
+      <i class="fas fa-boxes me-2 fs-3"></i> Productos
+    </h2>
+    <div class="d-flex gap-2">
+      <!-- Botón para abrir/ocultar el sidebar de filtros -->
+      <button
+        class="btn btn-outline-primary"
+        type="button"
+        id="toggleFilterSidebarBtn"
+        title="Mostrar/Ocultar filtros"
+      >
+        <i class="fas fa-filter me-1"></i> Filtros
+      </button>
 
-                <!-- Formulario para eliminación múltiple -->
-                <form
-                        id="bulkDeleteForm"
-                        method="post"
-                        action="{% url 'stock:producto_list' %}"
-                >
-                    {% csrf_token %}
-                    <button
-                            type="submit"
-                            class="btn btn-outline-danger"
-                            id="bulkDeleteBtn"
-                            disabled
+      <!-- Formulario para eliminación múltiple -->
+      <form
+        id="bulkDeleteForm"
+        method="post"
+        action="{% url 'stock:producto_list' %}"
+      >
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="btn btn-outline-danger"
+          id="bulkDeleteBtn"
+          disabled
+        >
+          <i class="fas fa-trash-alt"></i> Eliminar seleccionados
+        </button>
+        <!-- Aquí el JS inyectará inputs hidden para cada checkbox marcado -->
+        <div id="selectedProducts" style="display: none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- ============================================= -->
+    <!-- 1) Tabla de productos (col-md-9)              -->
+    <!-- ============================================= -->
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-uppercase small text-muted">
+              <tr>
+                <th class="text-center">
+                  <!-- checkbox "Select All" -->
+                  <input type="checkbox" id="selectAll">
+                </th>
+                <th>Imagen</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Atributos</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for producto in productos %}
+                <tr class="text-center" id="row-{{ producto.pk }}">
+                  <!-- Checkbox individual de la fila -->
+                  <td>
+                    <input
+                      type="checkbox"
+                      class="row-checkbox"
+                      name="selected_products"
+                      value="{{ producto.pk }}"
+                      data-product-id="{{ producto.pk }}"
                     >
-                        <i class="fas fa-trash-alt"></i> Eliminar seleccionados
-                    </button>
-                    <!-- Aquí el JS inyectará inputs hidden para cada checkbox marcado -->
-                    <div id="selectedProducts" style="display: none;"></div>
-                </form>
-            </div>
-        </div>
+                  </td>
 
-        <div class="row">
-            <!-- ============================================= -->
-            <!-- 1) Tabla de productos (col-md-9)              -->
-            <!-- ============================================= -->
-            <div class="col-md-9">
-                <div class="card border-0 shadow-sm">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light text-uppercase small text-muted">
-                            <tr>
-                                <th class="text-center">
-                                    <!-- checkbox “Select All” -->
-                                    <input type="checkbox" id="selectAll">
-                                </th>
-                                <th>Imagen</th>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Atributos</th>
-                                <th>Stock</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for producto in productos %}
-                                <tr class="text-center" id="row-{{ producto.pk }}">
-                                    <!-- Checkbox individual de la fila -->
-                                    <td>
-                                        <input
-                                                type="checkbox"
-                                                class="row-checkbox"
-                                                name="selected_products"
-                                                value="{{ producto.pk }}"
-                                                data-product-id="{{ producto.pk }}"
-                                        >
-                                    </td>
+                  <!-- Imagen del producto -->
+                  <td>
+                    {% if producto.imagen %}
+                      <img
+                        src="{{ producto.imagen.url }}"
+                        class="img-thumbnail rounded-circle"
+                        alt="Imagen {{ producto.nombre }}"
+                        style="max-width: 40px; max-height: 40px;"
+                      >
+                    {% else %}
+                      <i class="fas fa-camera text-muted"></i>
+                    {% endif %}
+                  </td>
 
-                                    <!-- Imagen del producto -->
-                                    <td>
-                                        {% if producto.imagen %}
-                                            <img
-                                                    src="{{ producto.imagen.url }}"
-                                                    class="img-thumbnail rounded-circle"
-                                                    alt="Imagen {{ producto.nombre }}"
-                                                    style="max-width: 40px; max-height: 40px;"
-                                            >
-                                        {% else %}
-                                            <i class="fas fa-camera text-muted"></i>
-                                        {% endif %}
-                                    </td>
-
-                                    <!-- Resto de columnas -->
-                                    <td>{{ producto.codigo_barras }}</td>
-                                    <td>{{ producto.nombre }}</td>
-                                    <td>
+                  <!-- Resto de columnas -->
+                  <td>{{ producto.codigo_barras }}</td>
+                  <td>{{ producto.nombre }}</td>
+                  <td>
                     <span
-                            class="badge rounded-pill"
-                            style="background-color:{{ producto.categoria.color|default:'#ccc' }};color:#fff;"
+                      class="badge rounded-pill"
+                      style="background-color:{{ producto.categoria.color|default:'#ccc' }};color:#fff;"
                     >
                       {{ producto.categoria.nombre|default:"—" }}
                     </span>
-                                    </td>
-                                    <td>
-                                        {% for pa in producto.productoatributo_set.all %}
-                                            <span
-                                                    class="badge rounded-pill"
-                                                    style="background-color:{{ pa.opcion.color|default:'#eee' }};color:#000;"
-                                            >
+                  </td>
+                  <td>
+                    {% for pa in producto.productoatributo_set.all %}
+                      <span
+                        class="badge rounded-pill"
+                        style="background-color:{{ pa.opcion.color|default:'#eee' }};color:#000;"
+                      >
                         {{ pa.opcion.valor }}
                       </span>
-                                        {% endfor %}
-                                    </td>
-                                    <td>{{ producto.stock_actual }}</td>
-                                    <td>{{ producto.get_estado_display }}</td>
-                                    <td>
-                                        <a
-                                                href="{% url 'stock:producto_edit' producto.pk %}"
-                                                class="btn btn-sm btn-outline-secondary"
-                                                title="Editar producto"
-                                        >
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="9" class="text-center py-5 text-muted">
-                                        No hay productos.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                    {% endfor %}
+                  </td>
+                  <td>{{ producto.stock_actual }}</td>
+                  <td>{{ producto.get_estado_display }}</td>
+                  <td>
+                    <a
+                      href="{% url 'stock:producto_edit' producto.pk %}"
+                      class="btn btn-sm btn-outline-secondary"
+                      title="Editar producto"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center py-5 text-muted">
+                    No hay productos.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                <!-- ============================================= -->
-                <!-- 1.1) Exportar y Paginación                   -->
-                <!-- ============================================= -->
-                <div class="d-flex justify-content-between align-items-center my-3">
-                    <!-- Export dropdown -->
-                    <div class="dropdown">
-                        <button
-                                class="btn btn-secondary dropdown-toggle"
-                                type="button"
-                                id="exportDropdown"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                        >
-                            <i class="fas fa-file-export me-1"></i> Exportar Productos
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                            <li>
-                                <a
-                                        class="dropdown-item"
-                                        href="{% url 'stock:export_productos_csv' %}?{{ request.GET.urlencode }}"
-                                >
-                                    <i class="fas fa-file-csv me-1"></i> CSV
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                        class="dropdown-item"
-                                        href="{% url 'stock:export_productos_excel' %}?{{ request.GET.urlencode }}"
-                                >
-                                    <i class="fas fa-file-excel me-1"></i> Excel
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                        class="dropdown-item"
-                                        href="{% url 'stock:export_productos_pdf' %}?{{ request.GET.urlencode }}"
-                                >
-                                    <i class="fas fa-file-pdf me-1"></i> PDF
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+      <!-- Exportar y Paginación -->
+      <div class="d-flex justify-content-between align-items-center my-3">
+        <!-- Export dropdown -->
+        <div class="dropdown">
+          <button
+            class="btn btn-secondary dropdown-toggle"
+            type="button"
+            id="exportDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i class="fas fa-file-export me-1"></i> Exportar Productos
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+            <li>
+              <a
+                class="dropdown-item"
+                href="{% url 'stock:export_productos_csv' %}?{{ request.GET.urlencode }}"
+              >
+                <i class="fas fa-file-csv me-1"></i> CSV
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="{% url 'stock:export_productos_excel' %}?{{ request.GET.urlencode }}"
+              >
+                <i class="fas fa-file-excel me-1"></i> Excel
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="{% url 'stock:export_productos_pdf' %}?{{ request.GET.urlencode }}"
+              >
+                <i class="fas fa-file-pdf me-1"></i> PDF
+              </a>
+            </li>
+          </ul>
+        </div>
 
-                    <!-- Paginación -->
-                    {% if is_paginated %}
-                        <nav>
-                            <ul class="pagination mb-0">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a
-                                                class="page-link"
-                                                href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}"
-                                                aria-label="Anterior"
-                                        >&laquo;</a>
-                                    </li>
-                                {% endif %}
+        <!-- Paginación -->
+        {% if is_paginated %}
+          <nav>
+            <ul class="pagination mb-0">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}"
+                    aria-label="Anterior"
+                  >&laquo;</a>
+                </li>
+              {% endif %}
 
-                                {% for num in page_obj.paginator.page_range %}
-                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                        <a
-                                                class="page-link"
-                                                href="?page={{ num }}&{{ request.GET.urlencode }}"
-                                        >{{ num }}</a>
-                                    </li>
-                                {% endfor %}
+              {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                  <a
+                    class="page-link"
+                    href="?page={{ num }}&{{ request.GET.urlencode }}"
+                  >{{ num }}</a>
+                </li>
+              {% endfor %}
 
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a
-                                                class="page-link"
-                                                href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}"
-                                                aria-label="Siguiente"
-                                        >&raquo;</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    {% endif %}
-                </div>
-            </div> <!-- /.col-md-9 -->
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}"
+                    aria-label="Siguiente"
+                  >&raquo;</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Sidebar de filtros -->
+<aside class="filter-sidebar" id="filterSidebar">
+  <div class="filter-sidebar-header">
+    <h5 class="filter-sidebar-title">
+      <i class="fas fa-filter me-2"></i>Filtros
+    </h5>
+    <button class="filter-sidebar-close" id="closeFilterSidebar">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
 
-            <!-- ============================================= -->
-            <!-- 2) Sidebar de filtros (col-md-3)             -->
-            <!-- ============================================= -->
-            <div class="col-md-3">
-                <div
-                        id="filterSidebar"
-                        class="collapse {% if request.GET.search or request.GET.categoria or request.GET.estado or request.GET.atributo or opciones_seleccionadas %}show{% endif %}"
-                >
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <strong><i class="fas fa-filter me-1"></i> Filtros</strong>
-                            <!-- “X” para cerrar -->
-                            <button
-                                    id="closeFilterSidebar"
-                                    type="button"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#filterSidebar"
-                                    aria-controls="filterSidebar"
-                            >
-                                <i class="fas fa-times"></i>
-                            </button>
-
-                        </div>
-                        <div class="card-body">
-                            <form method="get" id="filterForm">
-                                <!-- 2.1) Buscar por texto -->
-                                <div class="mb-3">
-                                    <label for="searchInput" class="form-label fw-medium">Buscar producto</label>
-                                    <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="fas fa-search text-primary"></i>
-                  </span>
-                                        <input
-                                                type="text"
-                                                id="searchInput"
-                                                name="search"
-                                                class="form-control border-start-0 ps-0"
-                                                placeholder="Nombre, código o descripción..."
-                                                value="{{ request.GET.search|default_if_none:'' }}"
-                                        />
-                                    </div>
-                                </div>
-
-                                <!-- 2.2) Filtrar por Categoría -->
-                                <div class="mb-3">
-                                    <label for="categoriaSelect" class="form-label fw-medium">Categoría</label>
-                                    <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="fas fa-layer-group text-primary"></i>
-                  </span>
-                                        <select
-                                                id="categoriaSelect"
-                                                name="categoria"
-                                                class="form-select ps-0"
-                                        >
-                                            <option value="">Todas</option>
-                                            {% for cat in categorias %}
-                                                <option
-                                                        value="{{ cat.id }}"
-                                                        {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}
-                                                >
-                                                    {{ cat.nombre }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- 2.3) Filtrar por Estado -->
-                                <div class="mb-3">
-                                    <label for="estadoSelect" class="form-label fw-medium">Estado</label>
-                                    <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="fas fa-chart-line text-primary"></i>
-                  </span>
-                                        <select
-                                                id="estadoSelect"
-                                                name="estado"
-                                                class="form-select ps-0"
-                                        >
-                                            <option value="">Todos</option>
-                                            {% for valor, nombre in estados %}
-                                                <option
-                                                        value="{{ valor }}"
-                                                        {% if request.GET.estado == valor %}selected{% endif %}
-                                                >
-                                                    {{ nombre }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- 2.4) Filtrar por Atributo -->
-                                <div class="mb-3">
-                                    <label for="atributoSelect" class="form-label fw-medium">Atributo</label>
-                                    <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="fas fa-tag text-primary"></i>
-                  </span>
-                                        <select
-                                                id="atributoSelect"
-                                                name="atributo"
-                                                class="form-select ps-0"
-                                                onchange="document.getElementById('filterForm').submit();"
-                                        >
-                                            <option value="">Seleccionar</option>
-                                            {% for attr in atributos %}
-                                                <option
-                                                        value="{{ attr.id }}"
-                                                        {% if request.GET.atributo == attr.id|stringformat:"s" %}selected{% endif %}
-                                                >
-                                                    {{ attr.nombre }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- 2.5) Si existe un atributo seleccionado, mostramos sus opciones -->
-                                {% if opciones %}
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Opciones</label>
-                                        <div class="row row-cols-1 g-1">
-                                            {% for opt in opciones %}
-                                                <div class="col">
-                                                    <div class="form-check">
-                                                        <input
-                                                                class="form-check-input"
-                                                                type="checkbox"
-                                                                name="opcion"
-                                                                value="{{ opt.id }}"
-                                                                id="op_{{ opt.id }}"
-                                                                {% if opt.id|stringformat:"s" in opciones_seleccionadas %}checked{% endif %}
-                                                        >
-                                                        <label class="form-check-label d-flex align-items-center"
-                                                               for="op_{{ opt.id }}">
-                            <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill">
-                              {{ opt.valor }}
-                            </span>
-                                                            {% if opt.color %}
-                                                                <span
-                                                                        class="ms-2"
-                                                                        style="
-                                                                                display:inline-block;
-                                                                                width: 12px;
-                                                                                height: 12px;
-                                                                                background-color: {{ opt.color }};
-                                                                                border-radius: 50%;
-                                                                                "
-                                                                ></span>
-                                                            {% endif %}
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <!-- 2.6) Botones Aplicar / Limpiar -->
-                                <div class="d-flex gap-2 mt-4">
-                                    <button type="submit" class="btn btn-primary flex-grow-1">
-                                        <i class="fas fa-filter me-1"></i> Aplicar
-                                    </button>
-                                    <a
-                                            id="clearFiltersBtn"
-                                            href="{% url 'stock:producto_list' %}"
-                                            class="btn btn-outline-secondary"
-                                            title="Limpiar todos los filtros"
-                                    >
-                                        <i class="fas fa-rotate-left"></i>
-                                    </a>
-
-
-                                </div>
-                            </form>
-                        </div> <!-- /.card-body -->
-                    </div>   <!-- /.card -->
-                </div>     <!-- /#filterSidebar .collapse -->
-            </div>       <!-- /.col-md-3 -->
-        </div>         <!-- /.row -->
-    </div>           <!-- /.container-fluid -->
+  <div class="filter-sidebar-content">
+    <form method="get" id="filterForm">
+      <div class="mb-3">
+        <label class="form-label">Buscar</label>
+        <input type="text" name="search" class="form-control" value="{{ request.GET.search|default_if_none:'' }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <select name="categoria" class="form-select">
+          <option value="">Todas</option>
+          {% for cat in categorias %}
+            <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <select name="estado" class="form-select">
+          <option value="">Todos</option>
+          {% for valor, nombre in estados %}
+            <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>{{ nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Atributo</label>
+        <select name="atributo" class="form-select" onchange="document.getElementById('filterForm').submit();">
+          <option value="">Seleccionar</option>
+          {% for attr in atributos %}
+            <option value="{{ attr.id }}" {% if request.GET.atributo == attr.id|stringformat:"s" %}selected{% endif %}>{{ attr.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if opciones %}
+        <div class="mb-3">
+          <label class="form-label">Opciones</label>
+          {% for opt in opciones %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="opcion" value="{{ opt.id }}" id="op_{{ opt.id }}" {% if opt.id|stringformat:"s" in opciones_seleccionadas %}checked{% endif %}>
+              <label class="form-check-label" for="op_{{ opt.id }}">{{ opt.valor }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="d-grid gap-2 mt-3">
+        <button class="btn btn-primary" type="submit">
+          <i class="fas fa-filter me-1"></i> Aplicar
+        </button>
+        <a href="{% url 'stock:producto_list' %}" class="btn btn-outline-secondary" id="clearFiltersBtn">
+          <i class="fas fa-times"></i> Limpiar
+        </a>
+      </div>
+    </form>
+  </div>
+</aside>
 {% endblock %}
-
-
-{% block extra_scripts %}
-
-    <script src="{% static 'producto/js/producto_list.js' %}"></script>
-{% endblock %}
-
 
 {% block extra_css %}
-    <style>
-        /* ================================
-           Ajustes para el sidebar de filtros
-           ================================ */
-        #filterSidebar .card {
-            border: none;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
 
-        #filterSidebar .card-header {
-            background-color: #f8f9fa;
-        }
-
-        #filterSidebar .card-body form .form-label {
-            font-weight: 500;
-        }
-
-        #filterSidebar .form-check-label .badge {
-            font-size: 0.875rem;
-        }
-
-        /* Pantallas pequeñas: que el sidebar ocupe 100% */
-        @media (max-width: 576px) {
-            .col-md-3 {
-                flex: 0 0 100%;
-                max-width: 100%;
-                margin-bottom: 1rem;
-            }
-
-            .col-md-9 {
-                flex: 0 0 100%;
-                max-width: 100%;
-            }
-        }
-    </style>
 {% endblock %}
