@@ -1,271 +1,232 @@
+
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Innstala Control Stock</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Innstala Control Stock</title>
 
-  <!-- ==========================================
-       1) BOOTSTRAP CSS (sin integrity para evitar bloqueos)
-       ========================================== -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    crossorigin="anonymous"
-  />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
 
-  <!-- ==========================================
-       2) FONT AWESOME (sin integrity para evitar bloqueos)
-       ========================================== -->
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    rel="stylesheet"
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
-  <!-- ==========================================
-       3) TU CSS PERSONALIZADO PARA EL NAV
-       ========================================== -->
-  <link rel="stylesheet" href="{% static 'css/nav.css' %}" />
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="{% static 'css/nav.css' %}"/>
 </head>
 <body>
-  <!-- ==========================================
-       A) TOPBAR (FIJA ARRIBA)
-       ========================================== -->
-  <nav class="topbar">
-    <div class="topbar-logo">
-      <i class="fas fa-warehouse logo-icon"></i>
-      <span class="logo-text">Innstala</span>
-    </div>
-    <div class="topbar-actions">
-      <div class="topbar-icon" id="darkModeToggleTopbar" title="Cambiar tema">
-        <i class="fas fa-moon"></i>
-        <span class="tooltip-text">Cambiar tema</span>
-      </div>
-      <a href="#" class="topbar-icon" title="Configuración">
-        <i class="fas fa-cog"></i>
-      </a>
-      <a
-        href="#"
-        class="topbar-icon"
-        data-bs-toggle="modal"
-        data-bs-target="#infoModal"
-        title="Info"
-      >
-        <i class="fas fa-info-circle"></i>
-      </a>
-      {% if user.is_authenticated %}
-        <a href="{% url 'perfil' %}" class="topbar-icon" title="Mi perfil">
-          <i class="fas fa-user"></i>
+    <!-- Topbar -->
+    <nav class="topbar">
+        <div class="topbar-left d-flex align-items-center gap-3">
+            <!-- Botón toggle sidebar -->
+            <button id="toggleSidebarBtn" class="sidebar-inline-toggle" title="Mostrar/Ocultar menú lateral">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Logo -->
+            <div class="topbar-logo">
+                <i class="fas fa-warehouse logo-icon"></i>
+                <span class="logo-text">Innstala</span>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="topbar-actions">
+            <div class="topbar-icon" id="darkModeToggleTopbar" >
+                <i class="fas fa-moon"></i>
+            </div>
+            <a href="#" class="topbar-icon" title="Configuración">
+                <i class="fas fa-cog"></i>
+            </a>
+            <a href="#" class="topbar-icon" data-bs-toggle="modal" data-bs-target="#infoModal" title="Info">
+                <i class="fas fa-info-circle"></i>
+            </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'perfil' %}" class="topbar-icon" title="Mi perfil">
+                    <i class="fas fa-user"></i>
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="topbar-icon" title="Iniciar sesión">
+                    <i class="fas fa-user"></i>
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Botón interno para cerrar (opcional) -->
+        <div class="sidebar-toggle" id="sidebarInternalToggle">
+            <i class="fas fa-times"></i>
+        </div>
+
+        <!-- Menú -->
+        <a href="{% url 'stock:dashboard' %}">
+            <i class="fas fa-home"></i>
+            <span class="link-text">Inicio</span>
         </a>
-      {% else %}
-        <a href="{% url 'login' %}" class="topbar-icon" title="Iniciar sesión">
-          <i class="fas fa-user"></i>
+
+        <!-- Productos -->
+        <a data-bs-toggle="collapse" href="#productosSubmenu" role="button" aria-expanded="false" aria-controls="productosSubmenu">
+            <i class="fas fa-boxes"></i>
+            <span class="link-text">Productos</span>
+            <i class="fas fa-chevron-down ms-auto"></i>
         </a>
-      {% endif %}
-    </div>
-  </nav>
-
-  <!-- ==========================================
-       B) SIDEBAR (FIJA A LA IZQUIERDA, ABIERTA POR DEFECTO)
-       ========================================== -->
-  <aside class="sidebar" id="sidebar">
-    <!-- ==========================
-         B.1) BOTÓN/FLECHA PARA ABRIR/CERRAR
-         ========================== -->
-    <div class="sidebar-toggle" id="sidebarToggle" title="Mostrar / Ocultar menú">
-      <!-- Por defecto la flecha apunta a la izquierda -->
-      <i class="fas fa-chevron-left"></i>
-    </div>
-
-    <!-- ==========================
-         B.2) ENLACE “Inicio”
-         ========================== -->
-    <a href="{% url 'stock:dashboard' %}">
-      <i class="fas fa-arrow-left"></i>
-      <span class="link-text">Inicio</span>
-    </a>
-
-    <!-- ==========================
-         B.3) MENÚ “Productos”
-         ========================== -->
-    <a
-      data-bs-toggle="collapse"
-      href="#productosSubmenu"
-      role="button"
-      aria-expanded="false"
-      aria-controls="productosSubmenu"
-    >
-      <i class="fas fa-boxes"></i>
-      <span class="link-text">Productos</span>
-      <i class="fas fa-chevron-down ms-auto"></i>
-    </a>
-    <div class="collapse submenu" id="productosSubmenu">
-      <a href="{% url 'stock:producto_create' %}">
-        <span class="link-text">Crear Producto</span>
-      </a>
-      <a href="{% url 'stock:producto_list' %}">
-        <span class="link-text">Ver Producto</span>
-      </a>
-    </div>
-
-    <!-- ==========================
-         B.4) MENÚ “Atributo”
-         ========================== -->
-    <a
-      data-bs-toggle="collapse"
-      href="#atributoSubmenu"
-      role="button"
-      aria-expanded="false"
-      aria-controls="atributoSubmenu"
-    >
-      <i class="fas fa-tools"></i>
-      <span class="link-text">Atributo</span>
-      <i class="fas fa-chevron-down ms-auto"></i>
-    </a>
-    <div class="collapse submenu" id="atributoSubmenu">
-      <a href="{% url 'stock:atributo_create' %}">
-        <span class="link-text">Crear Atributo</span>
-      </a>
-      <a href="{% url 'stock:atributo_list' %}">
-        <span class="link-text">Ver Atributo</span>
-      </a>
-    </div>
-
-    <!-- ==========================
-         B.5) MENÚ “Categorías”
-         ========================== -->
-    <a
-      data-bs-toggle="collapse"
-      href="#categoriasSubmenu"
-      role="button"
-      aria-expanded="false"
-      aria-controls="categoriasSubmenu"
-    >
-      <i class="fas fa-tags"></i>
-      <span class="link-text">Categorías</span>
-      <i class="fas fa-chevron-down ms-auto"></i>
-    </a>
-    <div class="collapse submenu" id="categoriasSubmenu">
-      <a href="{% url 'stock:categoria_create' %}">
-        <span class="link-text">Crear Categoría</span>
-      </a>
-      <a href="{% url 'stock:categoria_list' %}">
-        <span class="link-text">Ver Categoría</span>
-      </a>
-    </div>
-
-    <!-- ==========================
-         B.6) ENLACE “Reportes”
-         ========================== -->
-    <div class="reportes">
-      <a href="{% url 'stock:reportar_error' %}">
-        <i class="fas fa-file-invoice"></i>
-        <span class="link-text">Reportes</span>
-      </a>
-    </div>
-  </aside>
-
-  <!-- ==========================================
-       C) MODAL “Info del Sistema”
-       ========================================== -->
-  <div
-    class="modal fade"
-    id="infoModal"
-    tabindex="-1"
-    aria-labelledby="infoModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="infoModalLabel">
-            <i class="fas fa-info-circle me-2"></i>Información del Sistema
-          </h5>
-          <button
-            type="button"
-            class="btn-close btn-close-white"
-            data-bs-dismiss="modal"
-            aria-label="Cerrar"
-          ></button>
+        <div class="collapse submenu" id="productosSubmenu">
+            <a href="{% url 'stock:producto_create' %}">
+                <span class="link-text">Crear Producto</span>
+            </a>
+            <a href="{% url 'stock:producto_list' %}">
+                <span class="link-text">Ver Producto</span>
+            </a>
         </div>
-        <div class="modal-body">
-          <h6 class="fw-bold">¿Qué es Innstala Control Stock?</h6>
-          <p>
-            Es un sistema avanzado de gestión de inventario diseñado para
-            empresas que buscan optimizar el control de productos, categorías y
-            atributos. Ofrece funcionalidades como creación de productos,
-            reportes, exportación de datos y más.
-          </p>
-          <h6 class="fw-bold mt-4">Sobre la empresa</h6>
-          <p>
-            <strong>Innstala S.L.</strong> desarrolla soluciones tecnológicas
-            innovadoras enfocadas en la eficiencia empresarial. Nuestro
-            compromiso es ayudarte a digitalizar y automatizar tus procesos
-            internos.
-          </p>
-          <h6 class="fw-bold mt-4">Soporte Técnico</h6>
-          <p>
-            ¿Tienes dudas o problemas? Escríbenos a
-            <a href="mailto:soporte@innstala.com">soporte@innstala.com</a>.
-            Estamos aquí para ayudarte.
-          </p>
+
+        <!-- Atributo -->
+        <a data-bs-toggle="collapse" href="#atributoSubmenu" role="button" aria-expanded="false" aria-controls="atributoSubmenu">
+            <i class="fas fa-tools"></i>
+            <span class="link-text">Atributo</span>
+            <i class="fas fa-chevron-down ms-auto"></i>
+        </a>
+        <div class="collapse submenu" id="atributoSubmenu">
+            <a href="{% url 'stock:atributo_create' %}">
+                <span class="link-text">Crear Atributo</span>
+            </a>
+            <a href="{% url 'stock:atributo_list' %}">
+                <span class="link-text">Ver Atributo</span>
+            </a>
         </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Cerrar
-          </button>
+
+        <!-- Categorías -->
+        <a data-bs-toggle="collapse" href="#categoriasSubmenu" role="button" aria-expanded="false" aria-controls="categoriasSubmenu">
+            <i class="fas fa-tags"></i>
+            <span class="link-text">Categorías</span>
+            <i class="fas fa-chevron-down ms-auto"></i>
+        </a>
+        <div class="collapse submenu" id="categoriasSubmenu">
+            <a href="{% url 'stock:categoria_create' %}">
+                <span class="link-text">Crear Categoría</span>
+            </a>
+            <a href="{% url 'stock:categoria_list' %}">
+                <span class="link-text">Ver Categoría</span>
+            </a>
         </div>
-      </div>
+
+        <!-- Reportes -->
+        <div class="reportes">
+            <a href="{% url 'stock:reportar_error' %}">
+                <i class="fas fa-file-invoice"></i>
+                <span class="link-text">Reportes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Modal Info -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="infoModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>Información del Sistema
+                </h5>
+                <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="fw-bold">¿Qué es Innstala Control Stock?</h6>
+                <p>
+                    Es un sistema avanzado de gestión de inventario diseñado para
+                    empresas que buscan optimizar el control de productos, categorías y
+                    atributos. Ofrece funcionalidades como creación de productos,
+                    reportes, exportación de datos y más.
+                </p>
+                <h6 class="fw-bold mt-4">Sobre la empresa</h6>
+                <p>
+                    <strong>Innstala S.L.</strong> desarrolla soluciones tecnológicas
+                    innovadoras enfocadas en la eficiencia empresarial. Nuestro
+                    compromiso es ayudarte a digitalizar y automatizar tus procesos
+                    internos.
+                </p>
+                <h6 class="fw-bold mt-4">Soporte Técnico</h6>
+                <p>
+                    ¿Tienes dudas o problemas? Escríbenos a
+                    <a href="mailto:soporte@innstala.com">soporte@innstala.com</a>.
+                    Estamos aquí para ayudarte.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                >
+                    Cerrar
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
+    </div>
 
-  <!-- ==========================================
-       D) CONTENIDO PRINCIPAL (RESPONDE AL MÁRGEN IZQUIERDO)
-       ========================================== -->
-  <div class="content">
-    {% block content %}
-    <!-- Aquí irá el contenido de cada vista concreta -->
-    {% endblock %}
-  </div>
+    <!-- Contenido principal -->
+    <div class="content">
+        {% block content %}
+        <!-- Aquí irá el contenido de cada vista concreta -->
+        {% endblock %}
+    </div>
 
-  <!-- ==========================================
-       E) SCRIPTS (AL FINAL, PARA QUE NO BLOQUEEN EL HTML)
-       ========================================== -->
-  <!-- 1) Bootstrap JS Bundle (sin integrity para evitar bloqueos) -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    crossorigin="anonymous"
-  ></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-  <!-- 2) JavaScript “casero” para alternar .collapsed en <aside id="sidebar"> -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // 1) Intentamos capturar ambos nodos
-      const sidebar = document.getElementById("sidebar");
-      const toggle  = document.getElementById("sidebarToggle");
+    <!-- JavaScript personalizado -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const sidebar = document.getElementById("sidebar");
+        const toggleBtn = document.getElementById("toggleSidebarBtn");
+        const internalToggle = document.getElementById("sidebarInternalToggle");
 
-      // 2) Comprobamos en consola si los encontró
-      console.log("sidebar:", sidebar);
-      console.log("toggle:", toggle);
+        // Función para alternar el sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle("collapsed");
 
-      // 3) Si existieron ambos, añadimos el listener
-      if (sidebar && toggle) {
-        toggle.addEventListener("click", function () {
-          sidebar.classList.toggle("collapsed");
-        });
-      } else {
-        console.warn(
-          "No se encontró #sidebar o #sidebarToggle. Revisa los ID en tu HTML."
-        );
-      }
+            // Cambiar icono del botón
+            const icon = toggleBtn.querySelector("i");
+            if (sidebar.classList.contains("collapsed")) {
+                icon.classList.replace("fa-bars", "fa-bars");
+            } else {
+                icon.classList.replace("fa-bars", "fa-bars");
+            }
+
+            // Guardar estado en localStorage
+            localStorage.setItem("sidebarCollapsed", sidebar.classList.contains("collapsed"));
+        }
+
+        // Eventos
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
+
+        if (internalToggle) {
+            internalToggle.addEventListener("click", function(e) {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
+
+        // Cargar estado inicial
+        const savedState = localStorage.getItem("sidebarCollapsed");
+        if (savedState === "true") {
+            sidebar.classList.add("collapsed");
+        }
     });
-  </script>
+    </script>
 </body>
 </html>

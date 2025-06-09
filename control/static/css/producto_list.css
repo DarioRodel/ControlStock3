@@ -21,7 +21,53 @@
 .filter-sidebar.show {
   transform: translateX(0);
 }
+/* Mejoras para el sidebar de filtros */
+#filterSidebar {
+    transition: all 0.3s ease;
+}
 
+#filterSidebar .card {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+#filterSidebar .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Asegurar que el sidebar no se muestre por defecto */
+#filterSidebar:not(.show) {
+    display: none;
+}
+
+/* Mejorar el botón de cerrar */
+[data-bs-toggle="collapse"] {
+    transition: all 0.2s ease;
+}
+
+[data-bs-toggle="collapse"]:not(.collapsed) i.fa-times {
+    transform: rotate(180deg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #filterSidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1050;
+        background: white;
+        overflow-y: auto;
+    }
+
+    #filterSidebar .card {
+        height: 100%;
+        border-radius: 0;
+    }
+}
 /* Encabezado dentro del sidebar */
 .filter-sidebar .sidebar-header {
   display: flex;

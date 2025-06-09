@@ -96,7 +96,7 @@ DATABASES = {
         'NAME': os.environ.get('DJANGO_DB_NAME', 'controlstock'),
         'USER': os.environ.get('DJANGO_DB_USER', 'root'),
         'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
-        'HOST': os.environ.get('DJANGO_DB_HOST', 'db'),
+        'HOST': os.environ.get('DJANGO_DB_HOST', '127.0.0.1' if not IS_DOCKER else 'control_stock'),
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -127,13 +127,14 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "control/static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MEDIA_URL = '/media/'
-STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

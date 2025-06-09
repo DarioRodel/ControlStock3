@@ -1,18 +1,17 @@
-// static/stock/producto_list.js
-
 document.addEventListener("DOMContentLoaded", function () {
-  // -------- Capturamos elementos del DOM --------
-  const selectAllCheckbox          = document.getElementById("selectAll");
-  const rowCheckboxes              = document.querySelectorAll(".row-checkbox");
-  const bulkDeleteBtn              = document.getElementById("bulkDeleteBtn");
-  const bulkDeleteForm             = document.getElementById("bulkDeleteForm");
-  const selectedProductsContainer  = document.getElementById("selectedProducts");
+  // -------- Capturamos elementos del DOM una sola vez --------
+  const selectAllCheckbox = document.getElementById("selectAll");
+  const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+  const bulkDeleteBtn = document.getElementById("bulkDeleteBtn");
+  const bulkDeleteForm = document.getElementById("bulkDeleteForm");
+  const selectedProductsContainer = document.getElementById("selectedProducts");
+  const filterSidebar = document.getElementById("filterSidebar");
+  const closeFilterBtn = document.querySelector("[data-bs-target='#filterSidebar']");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 
   // 1) Habilita o deshabilita el botón de eliminar
   function toggleDeleteBtn() {
-    // Si existe el botón, comprobamos si al menos un checkbox está marcado
     if (!bulkDeleteBtn) return;
-
     const anySelected = Array.from(rowCheckboxes).some(cb => cb.checked);
     bulkDeleteBtn.disabled = !anySelected;
   }
@@ -20,36 +19,31 @@ document.addEventListener("DOMContentLoaded", function () {
   // 2) Inyecta inputs hidden con los IDs de productos seleccionados
   function updateSelectedProducts() {
     if (!selectedProductsContainer) return;
-
-    // Vaciamos siempre el contenedor
     selectedProductsContainer.innerHTML = "";
-
-    // Por cada checkbox marcado, añadimos <input hidden name="selected_products" value="ID">
+    
     rowCheckboxes.forEach(cb => {
       if (cb.checked) {
-        const input  = document.createElement("input");
-        input.type   = "hidden";
-        input.name   = "selected_products";
-        input.value  = cb.value;  // el valor (=ID) que viene del atributo value="{{ producto.pk }}"
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "selected_products";
+        input.value = cb.value;
         selectedProductsContainer.appendChild(input);
       }
     });
   }
 
-  // 3) Lógica para “Select All” (encabezado)
+  // 3) Lógica para "Select All"
   if (selectAllCheckbox) {
     selectAllCheckbox.addEventListener("change", function () {
-      // Al marcar/desmarcar este “Select All”, marcamos o desmarcamos TODOS los row-checkbox
       rowCheckboxes.forEach(cb => cb.checked = this.checked);
       toggleDeleteBtn();
       updateSelectedProducts();
     });
   }
 
-  // 4) Lógica para cada checkbox individual de la fila
+  // 4) Lógica para checkboxes individuales
   rowCheckboxes.forEach(cb => {
     cb.addEventListener("change", function () {
-      // Si desmarcamos un checkbox individual y “Select All” estaba marcado, desmarcamos “Select All”
       if (!this.checked && selectAllCheckbox && selectAllCheckbox.checked) {
         selectAllCheckbox.checked = false;
       }
@@ -58,29 +52,61 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 5) Antes de enviar el formulario, inyectamos los inputs hidden y pedimos confirmación
+  // 5) Confirmación antes de eliminar
   if (bulkDeleteForm) {
     bulkDeleteForm.addEventListener("submit", function (e) {
-      // Primero inyectamos los inputs al div#selectedProducts
       updateSelectedProducts();
-
-      // Recolectamos cuántos checkboxes están marcados
       const seleccionados = Array.from(rowCheckboxes).filter(cb => cb.checked);
-
-      // Si no hay ninguno marcado, ó el usuario cancela el confirm, prevenimos envío
+      
       if (seleccionados.length === 0 || !confirm(`¿Eliminar ${seleccionados.length} producto(s) seleccionado(s)?`)) {
         e.preventDefault();
       }
     });
   }
 
-  // 6) (Opcional) Cerrar el sidebar de filtros con ESC
-  document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") {
-      const filterSidebar = document.getElementById("filterSidebar");
-      if (filterSidebar && filterSidebar.classList.contains("show")) {
-        new bootstrap.Collapse(filterSidebar).hide();
-      }
+  // 6) Cerrar el sidebar de filtros con ESC
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    const filterSidebar = document.getElementById("filterSidebar");
+    if (filterSidebar && filterSidebar.classList.contains("show")) {
+      new bootstrap.Collapse(filterSidebar).hide();
+    }
+  }
+});
+
+// 7) Botón para cerrar manualmente el sidebar
+const closeBtn = document.getElementById("closeFilterSidebar");
+if (closeBtn) {
+  closeBtn.addEventListener("click", function () {
+    const sidebar = document.getElementById("filterSidebar");
+    if (sidebar && sidebar.classList.contains("show")) {
+      new bootstrap.Collapse(sidebar).hide();
     }
   });
+}
+
+// 8) Botón para limpiar filtros también colapsa el sidebar
+if (clearFiltersBtn) {
+  clearFiltersBtn.addEventListener("click", function (e) {
+    e.preventDefault(); // evita que el enlace navegue inmediatamente
+
+    const sidebar = document.getElementById("filterSidebar");
+    if (sidebar && sidebar.classList.contains("show")) {
+      const collapse = new bootstrap.Collapse(sidebar, {
+        toggle: false
+      });
+      collapse.hide();
+
+      // Esperamos un poco para que el colapso se vea, luego redirigimos
+      setTimeout(() => {
+        window.location.href = clearFiltersBtn.href;
+      }, 300); // 300ms = duración del colapso
+    } else {
+      // Si el sidebar ya está oculto, redirige de inmediato
+      window.location.href = clearFiltersBtn.href;
+    }
+  });
+}
+
+
 });
