@@ -16,10 +16,15 @@
 
 /* Estructura principal */
 .container-fluid {
-  padding-right: 0; /* Para que el sidebar pueda pegarse al borde */
+  padding-right: 0;
+  transition: margin-right 0.3s ease;
 }
 
-/* Sidebar de filtros */
+.container-fluid.sidebar-open {
+  margin-right: 320px;
+}
+
+/* Sidebar de filtros mejorada */
 .filter-sidebar {
   position: fixed;
   top: 0;
@@ -27,7 +32,7 @@
   width: 320px;
   height: 100vh;
   background-color: white;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 15px rgba(0, 0, 0, 0.1);
   z-index: 1050;
   transition: right 0.3s ease;
   padding: 20px;
@@ -51,10 +56,15 @@
   background: none;
   border: none;
   font-size: 1.25rem;
-  cursor: pointer;
+  color: #6c757d;
+  transition: color 0.2s ease;
 }
 
-/* Overlay para el sidebar */
+.filter-sidebar-close:hover {
+  color: var(--danger-color);
+}
+
+/* Overlay mejorado */
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -65,7 +75,8 @@
   z-index: 1040;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  cursor: pointer;
 }
 
 .sidebar-overlay.show {
@@ -73,7 +84,7 @@
   visibility: visible;
 }
 
-/* Tabla de productos */
+/* Resto de tus estilos... */
 .table-responsive {
   overflow-x: auto;
 }
@@ -87,19 +98,17 @@
   background-color: var(--table-header-bg);
 }
 
-/* Checkboxes */
 input[type="checkbox"] {
   transform: scale(1.2);
   cursor: pointer;
 }
 
-/* Botones */
-.btn-outline-danger {
-  transition: all 0.3s ease;
-}
-
 /* Responsive */
 @media (max-width: 991.98px) {
+  .container-fluid.sidebar-open {
+    margin-right: 0;
+  }
+  
   .table thead {
     display: none;
   }
@@ -120,6 +129,16 @@ input[type="checkbox"] {
     margin-right: 1rem;
     text-align: left;
   }
+}
+
+/* Animación para el botón de filtros */
+#toggleFilterSidebarBtn {
+  transition: all 0.3s ease;
+}
+
+#toggleFilterSidebarBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 </style>
 {% endblock %}
@@ -319,7 +338,43 @@ input[type="checkbox"] {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   // =============================================
-  // Funcionalidad de selección múltiple CORREGIDA
+  // Funcionalidad del sidebar de filtros MEJORADA
+  // =============================================
+  const toggleFilterBtn = document.getElementById('toggleFilterSidebarBtn');
+  const closeFilterBtn = document.getElementById('closeFilterSidebar');
+  const filterSidebar = document.getElementById('filterSidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const mainContainer = document.getElementById('mainContainer');
+  
+  // Función para mostrar/ocultar sidebar
+  function toggleSidebar(show) {
+    if (show) {
+      filterSidebar.classList.add('show');
+      sidebarOverlay.classList.add('show');
+      mainContainer.classList.add('sidebar-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      filterSidebar.classList.remove('show');
+      sidebarOverlay.classList.remove('show');
+      mainContainer.classList.remove('sidebar-open');
+      document.body.style.overflow = '';
+    }
+  }
+  
+  // Event listeners mejorados
+  toggleFilterBtn.addEventListener('click', () => toggleSidebar(true));
+  closeFilterBtn.addEventListener('click', () => toggleSidebar(false));
+  sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
+  
+  // Cerrar con ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && filterSidebar.classList.contains('show')) {
+      toggleSidebar(false);
+    }
+  });
+
+  // =============================================
+  // Funcionalidad de selección múltiple (mantener igual)
   // =============================================
   const selectAll = document.getElementById('selectAll');
   const checkboxes = document.querySelectorAll('.row-checkbox');
@@ -327,12 +382,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const bulkDeleteForm = document.getElementById('bulkDeleteForm');
   const selectedProductsDiv = document.getElementById('selectedProducts');
 
-  // Función para actualizar el estado del botón de eliminación
   function updateBulkDeleteBtn() {
     const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
     bulkDeleteBtn.disabled = selectedCount === 0;
-
-    // Actualizar checkbox "Seleccionar todos"
+    
     if (selectedCount === 0) {
       selectAll.checked = false;
       selectAll.indeterminate = false;
@@ -345,7 +398,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Seleccionar/deseleccionar todos
   selectAll.addEventListener('change', function() {
     checkboxes.forEach(checkbox => {
       checkbox.checked = selectAll.checked;
@@ -353,38 +405,31 @@ document.addEventListener('DOMContentLoaded', function() {
     updateBulkDeleteBtn();
   });
 
-  // Escuchar cambios en los checkboxes individuales
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener('change', updateBulkDeleteBtn);
   });
 
-  // Manejar el envío del formulario de eliminación masiva - VERSIÓN CORREGIDA
   bulkDeleteForm.addEventListener('submit', function(e) {
     e.preventDefault();
-
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     if (selectedCheckboxes.length === 0) return;
-
-    // Confirmar antes de eliminar
+    
     if (!confirm(`¿Estás seguro de que deseas eliminar los ${selectedCheckboxes.length} productos seleccionados?`)) {
       return;
     }
-
-    // Crear campo oculto con los IDs separados por comas
+    
     selectedProductsDiv.innerHTML = '';
     const selectedIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value).join(',');
-
+    
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'productos_a_eliminar';
     input.value = selectedIds;
     selectedProductsDiv.appendChild(input);
-
-    // Enviar el formulario
+    
     this.submit();
   });
 
-  // Inicializar estado del botón
   updateBulkDeleteBtn();
 });
 </script>
