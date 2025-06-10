@@ -1,293 +1,391 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% block extra_css %}
+<style>
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #0b5ed7;
+  --danger-color: #dc3545;
+  --text-color: #212529;
+  --card-bg: #ffffff;
+  --input-border: #dee2e6;
+  --table-header-bg: #f8f9fa;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Estructura principal */
+.container-fluid {
+  padding-right: 0; /* Para que el sidebar pueda pegarse al borde */
+}
+
+/* Sidebar de filtros */
+.filter-sidebar {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 320px;
+  height: 100vh;
+  background-color: white;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  transition: right 0.3s ease;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.filter-sidebar.show {
+  right: 0;
+}
+
+.filter-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--input-border);
+}
+
+.filter-sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Overlay para el sidebar */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tabla de productos */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table th {
+  background-color: var(--table-header-bg);
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* Botones */
+.btn-outline-danger {
+  transition: all 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+  .table thead {
+    display: none;
+  }
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    text-align: right;
+    padding: 0.75rem 1rem;
+  }
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 1rem;
+    text-align: left;
+  }
+}
+</style>
+{% endblock %}
 
 {% block title %}Productos – InventarioPro{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-2">
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <h2 class="fw-bold text-primary fs-2">
-      <i class="fas fa-boxes me-2 fs-3"></i> Productos
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-primary">
+      <i class="fas fa-boxes me-2"></i> Productos
     </h2>
     <div class="d-flex gap-2">
-      <!-- Botón para abrir/ocultar el sidebar de filtros -->
-      <button
-        class="btn btn-outline-primary"
-        type="button"
-        id="toggleFilterSidebarBtn"
-        title="Mostrar/Ocultar filtros"
-      >
+      <button class="btn btn-outline-primary" id="toggleFilterSidebarBtn">
         <i class="fas fa-filter me-1"></i> Filtros
       </button>
-
-      <!-- Formulario para eliminación múltiple -->
-      <form
-        id="bulkDeleteForm"
-        method="post"
-        action="{% url 'stock:producto_list' %}"
-      >
+      <form id="bulkDeleteForm" method="post" action="{% url 'stock:producto_list' %}">
         {% csrf_token %}
-        <button
-          type="submit"
-          class="btn btn-outline-danger"
-          id="bulkDeleteBtn"
-          disabled
-        >
-          <i class="fas fa-trash-alt"></i> Eliminar seleccionados
+        <button type="submit" class="btn btn-outline-danger" id="bulkDeleteBtn" disabled>
+          <i class="fas fa-trash-alt me-1"></i> Eliminar seleccionados
         </button>
-        <!-- Aquí el JS inyectará inputs hidden para cada checkbox marcado -->
-        <div id="selectedProducts" style="display: none;"></div>
+        <div id="selectedProducts"></div>
       </form>
     </div>
   </div>
 
-  <div class="row">
-    <!-- ============================================= -->
-    <!-- 1) Tabla de productos (col-md-9)              -->
-    <!-- ============================================= -->
-    <div class="col-md-12">
-      <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-uppercase small text-muted">
-              <tr>
-                <th class="text-center">
-                  <!-- checkbox "Select All" -->
-                  <input type="checkbox" id="selectAll">
-                </th>
-                <th>Imagen</th>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Atributos</th>
-                <th>Stock</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for producto in productos %}
-                <tr class="text-center" id="row-{{ producto.pk }}">
-                  <!-- Checkbox individual de la fila -->
-                  <td>
-                    <input
-                      type="checkbox"
-                      class="row-checkbox"
-                      name="selected_products"
-                      value="{{ producto.pk }}"
-                      data-product-id="{{ producto.pk }}"
-                    >
-                  </td>
-
-                  <!-- Imagen del producto -->
-                  <td>
-                    {% if producto.imagen %}
-                      <img
-                        src="{{ producto.imagen.url }}"
-                        class="img-thumbnail rounded-circle"
-                        alt="Imagen {{ producto.nombre }}"
-                        style="max-width: 40px; max-height: 40px;"
-                      >
-                    {% else %}
-                      <i class="fas fa-camera text-muted"></i>
-                    {% endif %}
-                  </td>
-
-                  <!-- Resto de columnas -->
-                  <td>{{ producto.codigo_barras }}</td>
-                  <td>{{ producto.nombre }}</td>
-                  <td>
-                    <span
-                      class="badge rounded-pill"
-                      style="background-color:{{ producto.categoria.color|default:'#ccc' }};color:#fff;"
-                    >
-                      {{ producto.categoria.nombre|default:"—" }}
-                    </span>
-                  </td>
-                  <td>
-                    {% for pa in producto.productoatributo_set.all %}
-                      <span
-                        class="badge rounded-pill"
-                        style="background-color:{{ pa.opcion.color|default:'#eee' }};color:#000;"
-                      >
-                        {{ pa.opcion.valor }}
-                      </span>
-                    {% endfor %}
-                  </td>
-                  <td>{{ producto.stock_actual }}</td>
-                  <td>{{ producto.get_estado_display }}</td>
-                  <td>
-                    <a
-                      href="{% url 'stock:producto_edit' producto.pk %}"
-                      class="btn btn-sm btn-outline-secondary"
-                      title="Editar producto"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </a>
-                  </td>
-                </tr>
-              {% empty %}
-                <tr>
-                  <td colspan="9" class="text-center py-5 text-muted">
-                    No hay productos.
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Exportar y Paginación -->
-      <div class="d-flex justify-content-between align-items-center my-3">
-        <!-- Export dropdown -->
-        <div class="dropdown">
-          <button
-            class="btn btn-secondary dropdown-toggle"
-            type="button"
-            id="exportDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            <i class="fas fa-file-export me-1"></i> Exportar Productos
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-            <li>
-              <a
-                class="dropdown-item"
-                href="{% url 'stock:export_productos_csv' %}?{{ request.GET.urlencode }}"
-              >
-                <i class="fas fa-file-csv me-1"></i> CSV
-              </a>
-            </li>
-            <li>
-              <a
-                class="dropdown-item"
-                href="{% url 'stock:export_productos_excel' %}?{{ request.GET.urlencode }}"
-              >
-                <i class="fas fa-file-excel me-1"></i> Excel
-              </a>
-            </li>
-            <li>
-              <a
-                class="dropdown-item"
-                href="{% url 'stock:export_productos_pdf' %}?{{ request.GET.urlencode }}"
-              >
-                <i class="fas fa-file-pdf me-1"></i> PDF
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Paginación -->
-        {% if is_paginated %}
-          <nav>
-            <ul class="pagination mb-0">
-              {% if page_obj.has_previous %}
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}"
-                    aria-label="Anterior"
-                  >&laquo;</a>
-                </li>
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="text-center" style="width: 40px;">
+              <input type="checkbox" id="selectAll">
+            </th>
+            <th>Imagen</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Atributos</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for producto in productos %}
+          <tr id="row-{{ producto.pk }}">
+            <td class="text-center">
+              <input type="checkbox" class="row-checkbox" value="{{ producto.pk }}">
+            </td>
+            <td data-label="Imagen">
+              {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" class="img-thumbnail rounded-circle" style="width: 40px; height: 40px;">
+              {% else %}
+                <i class="fas fa-camera text-muted"></i>
               {% endif %}
-
-              {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                  <a
-                    class="page-link"
-                    href="?page={{ num }}&{{ request.GET.urlencode }}"
-                  >{{ num }}</a>
-                </li>
+            </td>
+            <td data-label="Código">{{ producto.codigo_barras }}</td>
+            <td data-label="Nombre">{{ producto.nombre }}</td>
+            <td data-label="Categoría">
+              <span class="badge rounded-pill" style="background-color: {{ producto.categoria.color|default:'#6c757d' }};">
+                {{ producto.categoria.nombre|default:"—" }}
+              </span>
+            </td>
+            <td data-label="Atributos">
+              {% for pa in producto.productoatributo_set.all %}
+                <span class="badge rounded-pill" style="background-color: {{ pa.opcion.color|default:'#e9ecef' }}; color: #000;">
+                  {{ pa.opcion.valor }}
+                </span>
               {% endfor %}
-
-              {% if page_obj.has_next %}
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}"
-                    aria-label="Siguiente"
-                  >&raquo;</a>
-                </li>
-              {% endif %}
-            </ul>
-          </nav>
-        {% endif %}
-      </div>
+            </td>
+            <td data-label="Stock">{{ producto.stock_actual }}</td>
+            <td data-label="Estado">{{ producto.get_estado_display }}</td>
+            <td data-label="Acciones">
+              <a href="{% url 'stock:producto_edit' producto.pk %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-edit"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center py-5 text-muted">
+              No hay productos.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <!-- Paginación -->
+  {% if is_paginated %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 
 <!-- Sidebar de filtros -->
 <aside class="filter-sidebar" id="filterSidebar">
   <div class="filter-sidebar-header">
-    <h5 class="filter-sidebar-title">
-      <i class="fas fa-filter me-2"></i>Filtros
-    </h5>
+    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h5>
     <button class="filter-sidebar-close" id="closeFilterSidebar">
       <i class="fas fa-times"></i>
     </button>
   </div>
 
-  <div class="filter-sidebar-content">
-    <form method="get" id="filterForm">
-      <div class="mb-3">
-        <label class="form-label">Buscar</label>
-        <input type="text" name="search" class="form-control" value="{{ request.GET.search|default_if_none:'' }}">
+  <form method="get" id="filterForm">
+    <div class="mb-3">
+      <label class="form-label">Buscar</label>
+      <input type="text" name="search" class="form-control" value="{{ request.GET.search|default:'' }}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Categoría</label>
+      <select name="categoria" class="form-select">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+        <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Estado</label>
+      <select name="estado" class="form-select">
+        <option value="">Todos los estados</option>
+        {% for valor, nombre in estados %}
+        <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>{{ nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Atributo</label>
+      <select name="atributo" class="form-select">
+        <option value="">Seleccionar atributo</option>
+        {% for attr in atributos %}
+        <option value="{{ attr.id }}" {% if request.GET.atributo == attr.id|stringformat:"s" %}selected{% endif %}>{{ attr.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% if opciones %}
+    <div class="mb-3">
+      <label class="form-label">Opciones</label>
+      {% for opt in opciones %}
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="opcion" value="{{ opt.id }}" id="opcion-{{ opt.id }}"
+               {% if opt.id|stringformat:"s" in request.GET.getlist|default:'' %}checked{% endif %}>
+        <label class="form-check-label" for="opcion-{{ opt.id }}">{{ opt.valor }}</label>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Categoría</label>
-        <select name="categoria" class="form-select">
-          <option value="">Todas</option>
-          {% for cat in categorias %}
-            <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Estado</label>
-        <select name="estado" class="form-select">
-          <option value="">Todos</option>
-          {% for valor, nombre in estados %}
-            <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>{{ nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Atributo</label>
-        <select name="atributo" class="form-select" onchange="document.getElementById('filterForm').submit();">
-          <option value="">Seleccionar</option>
-          {% for attr in atributos %}
-            <option value="{{ attr.id }}" {% if request.GET.atributo == attr.id|stringformat:"s" %}selected{% endif %}>{{ attr.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      {% if opciones %}
-        <div class="mb-3">
-          <label class="form-label">Opciones</label>
-          {% for opt in opciones %}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="opcion" value="{{ opt.id }}" id="op_{{ opt.id }}" {% if opt.id|stringformat:"s" in opciones_seleccionadas %}checked{% endif %}>
-              <label class="form-check-label" for="op_{{ opt.id }}">{{ opt.valor }}</label>
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-      <div class="d-grid gap-2 mt-3">
-        <button class="btn btn-primary" type="submit">
-          <i class="fas fa-filter me-1"></i> Aplicar
-        </button>
-        <a href="{% url 'stock:producto_list' %}" class="btn btn-outline-secondary" id="clearFiltersBtn">
-          <i class="fas fa-times"></i> Limpiar
-        </a>
-      </div>
-    </form>
-  </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-filter me-1"></i> Aplicar filtros
+      </button>
+      <a href="{% url 'stock:producto_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-times me-1"></i> Limpiar filtros
+      </a>
+    </div>
+  </form>
 </aside>
+
+<!-- Overlay para el sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<script src="{% static 'producto/js/producto_list.js' %}" defer></script>
 {% endblock %}
 
-{% block extra_css %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // =============================================
+  // Funcionalidad de selección múltiple CORREGIDA
+  // =============================================
+  const selectAll = document.getElementById('selectAll');
+  const checkboxes = document.querySelectorAll('.row-checkbox');
+  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+  const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+  const selectedProductsDiv = document.getElementById('selectedProducts');
 
+  // Función para actualizar el estado del botón de eliminación
+  function updateBulkDeleteBtn() {
+    const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
+    bulkDeleteBtn.disabled = selectedCount === 0;
+
+    // Actualizar checkbox "Seleccionar todos"
+    if (selectedCount === 0) {
+      selectAll.checked = false;
+      selectAll.indeterminate = false;
+    } else if (selectedCount === checkboxes.length) {
+      selectAll.checked = true;
+      selectAll.indeterminate = false;
+    } else {
+      selectAll.checked = false;
+      selectAll.indeterminate = true;
+    }
+  }
+
+  // Seleccionar/deseleccionar todos
+  selectAll.addEventListener('change', function() {
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+    updateBulkDeleteBtn();
+  });
+
+  // Escuchar cambios en los checkboxes individuales
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', updateBulkDeleteBtn);
+  });
+
+  // Manejar el envío del formulario de eliminación masiva - VERSIÓN CORREGIDA
+  bulkDeleteForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (selectedCheckboxes.length === 0) return;
+
+    // Confirmar antes de eliminar
+    if (!confirm(`¿Estás seguro de que deseas eliminar los ${selectedCheckboxes.length} productos seleccionados?`)) {
+      return;
+    }
+
+    // Crear campo oculto con los IDs separados por comas
+    selectedProductsDiv.innerHTML = '';
+    const selectedIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value).join(',');
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'productos_a_eliminar';
+    input.value = selectedIds;
+    selectedProductsDiv.appendChild(input);
+
+    // Enviar el formulario
+    this.submit();
+  });
+
+  // Inicializar estado del botón
+  updateBulkDeleteBtn();
+});
+</script>
 {% endblock %}

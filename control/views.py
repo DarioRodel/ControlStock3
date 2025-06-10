@@ -138,10 +138,9 @@ class ProductoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     paginate_by = 20
 
     def dispatch(self, request, *args, **kwargs):
-        """
-        Solo superuser, usuarios con rol 'admin' o 'ventas' pueden acceder.
-        """
-        if not request.user.is_superuser and request.user.rol not in ['admin', 'ventas']:
+        if not request.user.is_authenticated or (
+                not request.user.is_superuser and getattr(request.user, 'rol', None) not in ['admin', 'ventas']
+        ):
             return render(
                 request,
                 'stock/403.html',
