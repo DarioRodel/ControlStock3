@@ -1,4 +1,5 @@
 #!/bin/bash
+export DJANGO_SETTINGS_MODULE=ControlStock.settings
 
 # Espera a que la base de datos esté lista
 /wait-for-it.sh db:3306 --timeout=60 --strict -- echo "Database is up"

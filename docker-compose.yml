@@ -1,7 +1,8 @@
 version: "3.8"
+
 services:
   web:
-    build: ../../Desktop/a
+    build: .
     container_name: controlstock_web
     volumes:
       - .:/ControlStock
@@ -21,6 +22,8 @@ services:
       DJANGO_DB_USER: ${DJANGO_DB_USER}
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD}
       IS_DOCKER: 1
+    networks:
+      - traefik-net
 
   db:
     image: mysql:8.0
@@ -35,6 +38,12 @@ services:
       - db_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    networks:
+      - traefik-net
 
 volumes:
   db_data:
+
+networks:
+  traefik-net:
+    external: true

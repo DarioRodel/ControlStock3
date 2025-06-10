@@ -156,7 +156,7 @@ AUTH_USER_MODEL = 'control.UsuarioPersonalizado'
 LOGIN_URL = '/cuentas/login/'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'login'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
 LOGIN_REDIRECT_URL = 'stock:dashboard'
 LOGOUT_REDIRECT_URL = '/cuentas/login/'
 
