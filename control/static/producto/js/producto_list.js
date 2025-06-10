@@ -43,16 +43,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // 4) Lógica para checkboxes individuales
+    // 4) Lógica para checkboxes individuales
   rowCheckboxes.forEach(cb => {
     cb.addEventListener("change", function () {
-      if (!this.checked && selectAllCheckbox && selectAllCheckbox.checked) {
-        selectAllCheckbox.checked = false;
-      }
       toggleDeleteBtn();
       updateSelectedProducts();
+
+      // Lógica para estado indeterminado del "select all"
+      const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+      const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+      selectAllCheckbox.checked = allChecked;
+      selectAllCheckbox.indeterminate = !allChecked && anyChecked;
     });
   });
+
 
   // 5) Confirmación antes de eliminar
   if (bulkDeleteForm) {

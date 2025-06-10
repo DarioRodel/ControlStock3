@@ -5,6 +5,12 @@ services:
     container_name: controlstock_web
     volumes:
       - .:/ControlStock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`controlstock.es`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.web.loadbalancer.server.port=8000"
     ports:
       - "8005:8000"
     depends_on:

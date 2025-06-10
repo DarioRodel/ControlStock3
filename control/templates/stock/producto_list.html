@@ -141,7 +141,7 @@ input[type="checkbox"] {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 </style>
-{% endblock %}
+{% endblock %}{
 
 {% block title %}Productos – InventarioPro{% endblock %}
 
@@ -270,61 +270,90 @@ input[type="checkbox"] {
   </div>
 
   <form method="get" id="filterForm">
-    <div class="mb-3">
-      <label class="form-label">Buscar</label>
-      <input type="text" name="search" class="form-control" value="{{ request.GET.search|default:'' }}">
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Categoría</label>
-      <select name="categoria" class="form-select">
-        <option value="">Todas las categorías</option>
-        {% for cat in categorias %}
-        <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Estado</label>
-      <select name="estado" class="form-select">
-        <option value="">Todos los estados</option>
-        {% for valor, nombre in estados %}
-        <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>{{ nombre }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Atributo</label>
-      <select name="atributo" class="form-select">
-        <option value="">Seleccionar atributo</option>
-        {% for attr in atributos %}
-        <option value="{{ attr.id }}" {% if request.GET.atributo == attr.id|stringformat:"s" %}selected{% endif %}>{{ attr.nombre }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    {% if opciones %}
-    <div class="mb-3">
-      <label class="form-label">Opciones</label>
-      {% for opt in opciones %}
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="opcion" value="{{ opt.id }}" id="opcion-{{ opt.id }}"
-               {% if opt.id|stringformat:"s" in request.GET.getlist|default:'' %}checked{% endif %}>
-        <label class="form-check-label" for="opcion-{{ opt.id }}">{{ opt.valor }}</label>
+    <!-- Grupo de búsqueda -->
+    <div class="filter-group">
+      <div class="filter-group-title">
+        <span><i class="fas fa-search me-1"></i> Búsqueda</span>
+        <i class="fas fa-chevron-down"></i>
       </div>
-      {% endfor %}
+      <div class="filter-group-content" style="max-height: 200px;">
+        <div class="mb-3">
+          <input type="text" name="search" class="form-control" placeholder="Buscar productos..." value="{{ request.GET.search|default:'' }}">
+        </div>
+      </div>
     </div>
-    {% endif %}
 
-    <div class="d-grid gap-2">
-      <button type="submit" class="btn btn-primary">
-        <i class="fas fa-filter me-1"></i> Aplicar filtros
-      </button>
-      <a href="{% url 'stock:producto_list' %}" class="btn btn-outline-secondary">
-        <i class="fas fa-times me-1"></i> Limpiar filtros
-      </a>
+    <!-- Grupo de categorías -->
+    <div class="filter-group">
+      <div class="filter-group-title">
+        <span><i class="fas fa-tag me-1"></i> Categorías</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div class="filter-group-content" style="max-height: 200px;">
+        <select name="categoria" class="form-select mb-2">
+          <option value="">Todas las categorías</option>
+          {% for cat in categorias %}
+          <option value="{{ cat.id }}" {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Grupo de estados -->
+    <div class="filter-group">
+      <div class="filter-group-title">
+        <span><i class="fas fa-info-circle me-1"></i> Estado</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div class="filter-group-content" style="max-height: 200px;">
+        <select name="estado" class="form-select mb-2">
+          <option value="">Todos los estados</option>
+          {% for valor, nombre in estados %}
+          <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>{{ nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Grupo de atributos -->
+    <div class="filter-group">
+      <div class="filter-group-title">
+        <span><i class="fas fa-list-ul me-1"></i> Atributos</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div class="filter-group-content" style="max-height: 200px;">
+        <select name="atributo" class="form-select mb-3" id="atributoSelect">
+          <option value="">Seleccionar atributo</option>
+          {% for attr in atributos %}
+          <option value="{{ attr.id }}" {% if request.GET.atributo == attr.id|stringformat:"s" %}selected{% endif %}>{{ attr.nombre }}</option>
+          {% endfor %}
+        </select>
+
+        {% if opciones %}
+        <div class="opciones-container">
+          {% for opt in opciones %}
+          <label class="filter-option">
+            <input type="checkbox" name="opcion" value="{{ opt.id }}" id="opcion-{{ opt.id }}"
+                   {% if opt.id|stringformat:"s" in request.GET.getlist|default:'' %}checked{% endif %}>
+            {{ opt.valor }}
+            <span class="badge" style="background-color: {{ opt.color|default:'#e9ecef' }};"></span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="apply-filters-btn">
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-filter me-1"></i> Aplicar filtros
+        </button>
+        <a href="{% url 'stock:producto_list' %}" class="btn btn-outline-secondary">
+          <i class="fas fa-times me-1"></i> Limpiar filtros
+        </a>
+      </div>
     </div>
   </form>
 </aside>
@@ -336,101 +365,144 @@ input[type="checkbox"] {
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // =============================================
-  // Funcionalidad del sidebar de filtros MEJORADA
-  // =============================================
-  const toggleFilterBtn = document.getElementById('toggleFilterSidebarBtn');
-  const closeFilterBtn = document.getElementById('closeFilterSidebar');
-  const filterSidebar = document.getElementById('filterSidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const mainContainer = document.getElementById('mainContainer');
-  
-  // Función para mostrar/ocultar sidebar
+document.addEventListener("DOMContentLoaded", function () {
+  // =============================
+  // Elementos del DOM
+  // =============================
+  const selectAllCheckbox = document.getElementById("selectAll");
+  const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+  const bulkDeleteBtn = document.getElementById("bulkDeleteBtn");
+  const bulkDeleteForm = document.getElementById("bulkDeleteForm");
+  const selectedProductsContainer = document.getElementById("selectedProducts");
+
+  const filterSidebar = document.getElementById("filterSidebar");
+  const toggleFilterBtn = document.getElementById("toggleFilterSidebarBtn");
+  const closeFilterBtn = document.getElementById("closeFilterSidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+  // =============================
+  // Funciones auxiliares
+  // =============================
+
+  function updateBulkDeleteState() {
+    const selected = document.querySelectorAll(".row-checkbox:checked").length;
+    const total = rowCheckboxes.length;
+
+    bulkDeleteBtn.disabled = selected === 0;
+
+    if (selected === 0) {
+      selectAllCheckbox.checked = false;
+      selectAllCheckbox.indeterminate = false;
+    } else if (selected === total) {
+      selectAllCheckbox.checked = true;
+      selectAllCheckbox.indeterminate = false;
+    } else {
+      selectAllCheckbox.checked = false;
+      selectAllCheckbox.indeterminate = true;
+    }
+
+    updateSelectedInputs();
+  }
+
+  function updateSelectedInputs() {
+    selectedProductsContainer.innerHTML = "";
+
+    document.querySelectorAll(".row-checkbox:checked").forEach(cb => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "productos_a_eliminar";
+      input.value = cb.value;
+      selectedProductsContainer.appendChild(input);
+    });
+  }
+
+  // =============================
+  // Eventos para selección
+  // =============================
+
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", () => {
+      rowCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+      updateBulkDeleteState();
+    });
+  }
+
+  rowCheckboxes.forEach(cb => {
+    cb.addEventListener("change", updateBulkDeleteState);
+  });
+
+  // =============================
+  // Envío del formulario con confirmación
+  // =============================
+  if (bulkDeleteForm) {
+    bulkDeleteForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const selectedCount = document.querySelectorAll(".row-checkbox:checked").length;
+
+      if (selectedCount === 0) return;
+
+      if (confirm(`¿Estás seguro de que deseas eliminar los ${selectedCount} productos seleccionados?`)) {
+        updateSelectedInputs();
+        this.submit();
+      }
+    });
+  }
+
+  // =============================
+  // Sidebar de filtros
+  // =============================
   function toggleSidebar(show) {
     if (show) {
-      filterSidebar.classList.add('show');
-      sidebarOverlay.classList.add('show');
-      mainContainer.classList.add('sidebar-open');
-      document.body.style.overflow = 'hidden';
+      filterSidebar.classList.add("show");
+      sidebarOverlay.classList.add("show");
+      document.body.style.overflow = "hidden";
     } else {
-      filterSidebar.classList.remove('show');
-      sidebarOverlay.classList.remove('show');
-      mainContainer.classList.remove('sidebar-open');
-      document.body.style.overflow = '';
+      filterSidebar.classList.remove("show");
+      sidebarOverlay.classList.remove("show");
+      document.body.style.overflow = "";
     }
   }
-  
-  // Event listeners mejorados
-  toggleFilterBtn.addEventListener('click', () => toggleSidebar(true));
-  closeFilterBtn.addEventListener('click', () => toggleSidebar(false));
-  sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
-  
-  // Cerrar con ESC
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && filterSidebar.classList.contains('show')) {
+
+  if (toggleFilterBtn) {
+    toggleFilterBtn.addEventListener("click", () => toggleSidebar(true));
+  }
+
+  if (closeFilterBtn) {
+    closeFilterBtn.addEventListener("click", () => toggleSidebar(false));
+  }
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener("click", () => toggleSidebar(false));
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && filterSidebar.classList.contains("show")) {
       toggleSidebar(false);
     }
   });
 
-  // =============================================
-  // Funcionalidad de selección múltiple (mantener igual)
-  // =============================================
-  const selectAll = document.getElementById('selectAll');
-  const checkboxes = document.querySelectorAll('.row-checkbox');
-  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-  const bulkDeleteForm = document.getElementById('bulkDeleteForm');
-  const selectedProductsDiv = document.getElementById('selectedProducts');
+  // =============================
+  // Grupos de filtros colapsables
+  // =============================
+  document.querySelectorAll(".filter-group").forEach(group => {
+    const title = group.querySelector(".filter-group-title");
+    const content = group.querySelector(".filter-group-content");
 
-  function updateBulkDeleteBtn() {
-    const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
-    bulkDeleteBtn.disabled = selectedCount === 0;
-    
-    if (selectedCount === 0) {
-      selectAll.checked = false;
-      selectAll.indeterminate = false;
-    } else if (selectedCount === checkboxes.length) {
-      selectAll.checked = true;
-      selectAll.indeterminate = false;
-    } else {
-      selectAll.checked = false;
-      selectAll.indeterminate = true;
-    }
-  }
+    content.style.maxHeight = content.scrollHeight + "px";
 
-  selectAll.addEventListener('change', function() {
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = selectAll.checked;
+    title.addEventListener("click", () => {
+      group.classList.toggle("collapsed");
+      if (group.classList.contains("collapsed")) {
+        content.style.maxHeight = "0";
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
     });
-    updateBulkDeleteBtn();
   });
 
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', updateBulkDeleteBtn);
-  });
-
-  bulkDeleteForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-    if (selectedCheckboxes.length === 0) return;
-    
-    if (!confirm(`¿Estás seguro de que deseas eliminar los ${selectedCheckboxes.length} productos seleccionados?`)) {
-      return;
-    }
-    
-    selectedProductsDiv.innerHTML = '';
-    const selectedIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value).join(',');
-    
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'productos_a_eliminar';
-    input.value = selectedIds;
-    selectedProductsDiv.appendChild(input);
-    
-    this.submit();
-  });
-
-  updateBulkDeleteBtn();
+  // Inicialización
+  updateBulkDeleteState();
 });
+
 </script>
 {% endblock %}
